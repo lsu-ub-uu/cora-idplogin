@@ -19,12 +19,7 @@
 
 package se.uu.ub.cora.idplogin;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
 import javax.ws.rs.DELETE;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
@@ -32,63 +27,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import se.uu.ub.cora.gatekeepertokenprovider.AuthToken;
 import se.uu.ub.cora.gatekeepertokenprovider.GatekeeperTokenProvider;
-import se.uu.ub.cora.gatekeepertokenprovider.UserInfo;
 import se.uu.ub.cora.idplogin.initialize.IdpLoginInstanceProvider;
-import se.uu.ub.cora.idplogin.json.AuthTokenToJsonConverter;
 
 @Path("idplogin")
 public class IdpLoginEndpoint {
 
-	private UriInfo uriInfo;
-	private String url;
-
 	public IdpLoginEndpoint(@Context UriInfo uriInfo) {
-		this.uriInfo = uriInfo;
-		url = getBaseURLFromURI();
-	}
-
-	private String getBaseURLFromURI() {
-		String baseURI = uriInfo.getBaseUri().toString();
-		return baseURI + "apptoken/";
-	}
-
-	@POST
-	@Path("{userid}")
-	public Response getAuthTokenForAppToken(@PathParam("userid") String userId, String appToken) {
-		try {
-			return tryToGetAuthTokenForAppToken(userId, appToken);
-		} catch (Exception error) {
-			return handleError(error);
-		}
-	}
-
-	private Response tryToGetAuthTokenForAppToken(String userId, String appToken)
-			throws URISyntaxException {
-		return getNewAuthTokenFromGatekeeper(userId);
-	}
-
-	private Response getNewAuthTokenFromGatekeeper(String userId) throws URISyntaxException {
-		GatekeeperTokenProvider gatekeeperTokenProvider = IdpLoginInstanceProvider
-				.getGatekeeperTokenProvider();
-
-		UserInfo userInfo = UserInfo.withIdInUserStorage(userId);
-		AuthToken authTokenForUserInfo = gatekeeperTokenProvider.getAuthTokenForUserInfo(userInfo);
-		String json = convertAuthTokenToJson(authTokenForUserInfo, url + userId);
-		URI uri = new URI("apptoken/");
-		return Response.created(uri).entity(json).build();
-	}
-
-	private String convertAuthTokenToJson(AuthToken authTokenForUserInfo, String url) {
-		return new AuthTokenToJsonConverter(authTokenForUserInfo, url).convertAuthTokenToJson();
-	}
-
-	private Response handleError(Exception error) {
-		if (error instanceof NotFoundException) {
-			return buildResponse(Response.Status.NOT_FOUND);
-		}
-		return buildResponse(Status.INTERNAL_SERVER_ERROR);
 	}
 
 	private Response buildResponse(Status status) {

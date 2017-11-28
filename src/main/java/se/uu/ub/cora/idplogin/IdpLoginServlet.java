@@ -42,14 +42,19 @@ public class IdpLoginServlet extends HttpServlet {
 		out.println("function start() {");
 		out.println("var authInfo = {");
 		out.println("\"userId\" : \"Webredirect fake login\",");
-		out.println("\"token\" : \"" + authToken + "\",");
-		out.println("\"validForNoSeconds\" : \"" + validForNoSeconds + "\",");
+		out.println("\"token\" : \"");
+		out.println(authToken);
+		out.println("\",");
+		out.println("\"validForNoSeconds\" : \"");
+		out.println(validForNoSeconds);
+		out.println("\",");
 		out.println("\"actionLinks\" : {");
 		out.println("\"delete\" : {");
 		out.println("\"requestMethod\" : \"DELETE\",");
 		out.println("\"rel\" : \"delete\",");
-		out.println("\"url\" : \"http://localhost:8080/apptokenverifier/rest/apptoken/"
-				+ idInUserStorage + "\"");
+		out.println("\"url\" : \"http://localhost:8080/apptokenverifier/rest/apptoken/");
+		out.println(idInUserStorage);
+		out.println("\"");
 		out.println("}");
 		out.println("}");
 		out.println("};");
@@ -62,9 +67,7 @@ public class IdpLoginServlet extends HttpServlet {
 
 		out.println("<body>");
 		out.println("</body></html>");
-		// } finally {
 		out.close();
-		// }
 	}
 
 	private AuthToken getNewAuthTokenFromGatekeeper(UserInfo userInfo) {

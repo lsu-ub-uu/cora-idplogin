@@ -26,6 +26,7 @@ import se.uu.ub.cora.json.builder.org.OrgJsonBuilderFactoryAdapter;
 
 public final class AuthTokenToJsonConverter {
 
+	private static final String VALUE = "value";
 	private static final String NAME = "name";
 	private static final String CHILDREN = "children";
 	private AuthToken authToken;
@@ -78,19 +79,19 @@ public final class AuthTokenToJsonConverter {
 
 	private void addIdToJson(AuthToken authToken, JsonArrayBuilder userChildren) {
 		JsonObjectBuilder id = createObjectBuilderWithName("id");
-		id.addKeyString("value", authToken.token);
+		id.addKeyString(VALUE, authToken.token);
 		userChildren.addJsonObjectBuilder(id);
 	}
 
 	private void addValidForNoSecondsToJson(AuthToken authToken, JsonArrayBuilder userChildren) {
 		JsonObjectBuilder validForNoSeconds = createObjectBuilderWithName("validForNoSeconds");
-		validForNoSeconds.addKeyString("value", String.valueOf(authToken.validForNoSeconds));
+		validForNoSeconds.addKeyString(VALUE, String.valueOf(authToken.validForNoSeconds));
 		userChildren.addJsonObjectBuilder(validForNoSeconds);
 	}
 
 	private void addIdInUserStorageToJson(AuthToken authToken, JsonArrayBuilder userChildren) {
 		JsonObjectBuilder idInUserStorage = createObjectBuilderWithName("idInUserStorage");
-		idInUserStorage.addKeyString("value", String.valueOf(authToken.idInUserStorage));
+		idInUserStorage.addKeyString(VALUE, String.valueOf(authToken.idInUserStorage));
 		userChildren.addJsonObjectBuilder(idInUserStorage);
 	}
 

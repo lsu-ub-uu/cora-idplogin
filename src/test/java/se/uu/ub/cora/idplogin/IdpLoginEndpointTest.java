@@ -39,44 +39,8 @@ public class IdpLoginEndpointTest {
 		IdpLoginInstanceProvider.setGatekeeperTokenProvider(gatekeeperTokenProvider);
 	}
 
-	@Test
-	public void testGetAuthTokenForAppToken() {
-		UriInfo uriInfo = new TestUri();
-		IdpLoginEndpoint appTokenEndpoint = new IdpLoginEndpoint(uriInfo);
-
-		String userId = "someUserId";
-		String appToken = "someAppToken";
-
-		response = appTokenEndpoint.getAuthTokenForAppToken(userId, appToken);
-		assertResponseStatusIs(Response.Status.CREATED);
-		String expectedJsonToken = "{\"data\":{\"children\":["
-				+ "{\"name\":\"id\",\"value\":\"someAuthToken\"},"
-				+ "{\"name\":\"validForNoSeconds\",\"value\":\"278\"},"
-				+ "{\"name\":\"idInUserStorage\",\"value\":\"someIdInUserStorage\"}]"
-				+ ",\"name\":\"authToken\"},"
-				+ "\"actionLinks\":{\"delete\":{\"requestMethod\":\"DELETE\","
-				+ "\"rel\":\"delete\","
-				+ "\"url\":\"http://localhost:8080/apptoken/rest/apptoken/someUserId\"}}}";
-		String entity = (String) response.getEntity();
-		assertEquals(entity, expectedJsonToken);
-	}
-
 	private void assertResponseStatusIs(Status responseStatus) {
 		assertEquals(response.getStatusInfo(), responseStatus);
-	}
-
-	@Test
-	public void testGetAuthTokenForAppTokenErrorFromGatekeeper() {
-		GatekeeperTokenProviderErrorSpy gatekeeperTokenProvider = new GatekeeperTokenProviderErrorSpy();
-		IdpLoginInstanceProvider.setGatekeeperTokenProvider(gatekeeperTokenProvider);
-		UriInfo uriInfo = new TestUri();
-		IdpLoginEndpoint appTokenEndpoint = new IdpLoginEndpoint(uriInfo);
-
-		String userId = "someUserId";
-		String appToken = "someAppToken";
-
-		response = appTokenEndpoint.getAuthTokenForAppToken(userId, appToken);
-		assertResponseStatusIs(Response.Status.INTERNAL_SERVER_ERROR);
 	}
 
 	@Test
