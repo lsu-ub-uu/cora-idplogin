@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, 2017 Uppsala University Library
+ * Copyright 2017 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -17,7 +17,7 @@
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package se.uu.ub.cora.apptokenverifier;
+package se.uu.ub.cora.idplogin;
 
 import java.net.URI;
 import java.net.URISyntaxException;

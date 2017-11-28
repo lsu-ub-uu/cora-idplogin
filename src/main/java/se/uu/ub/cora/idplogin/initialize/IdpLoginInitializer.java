@@ -17,29 +17,24 @@
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package se.uu.ub.cora.apptokenverifier.initialize;
+package se.uu.ub.cora.idplogin.initialize;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
-import se.uu.ub.cora.apptokenstorage.AppTokenStorage;
 import se.uu.ub.cora.gatekeepertokenprovider.GatekeeperTokenProviderImp;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
 
 @WebListener
-public class AppTokenInitializer implements ServletContextListener {
+public class IdpLoginInitializer implements ServletContextListener {
 	private ServletContext servletContext;
 	private HashMap<String, String> initInfo;
-	private AppTokenStorage appTokenStorage;
 
 	@Override
 	public void contextInitialized(ServletContextEvent arg0) {
@@ -47,14 +42,12 @@ public class AppTokenInitializer implements ServletContextListener {
 		try {
 			tryToInitialize();
 		} catch (Exception e) {
-			throw new RuntimeException("Error starting AppTokenVerifier: " + e);
+			throw new RuntimeException("Error starting IdpLogin: " + e);
 		}
 	}
 
-	private void tryToInitialize() throws InstantiationException, IllegalAccessException,
-			ClassNotFoundException, NoSuchMethodException, InvocationTargetException {
+	private void tryToInitialize() {
 		collectInitInformation();
-		createAndSetApptokenStorage();
 		createAndSetGatekeeperTokenProvider();
 	}
 
@@ -67,14 +60,6 @@ public class AppTokenInitializer implements ServletContextListener {
 		}
 	}
 
-	private void createAndSetApptokenStorage()
-			throws InstantiationException, IllegalAccessException, ClassNotFoundException,
-			NoSuchMethodException, InvocationTargetException {
-		String userPickerProviderString = getInitParameter("appTokenStorageClassName");
-		createInstanceOfApptokenStorageProviderClass(userPickerProviderString);
-		AppTokenInstanceProvider.setApptokenStorage(appTokenStorage);
-	}
-
 	private String getInitParameter(String parameterName) {
 		if (initInfo.containsKey(parameterName)) {
 			return initInfo.get(parameterName);
@@ -82,18 +67,10 @@ public class AppTokenInitializer implements ServletContextListener {
 		throw new RuntimeException("Context must have a " + parameterName + " set.");
 	}
 
-	private void createInstanceOfApptokenStorageProviderClass(String userPickerProviderString)
-			throws InstantiationException, IllegalAccessException, ClassNotFoundException,
-			NoSuchMethodException, InvocationTargetException {
-		Constructor<?> constructor = Class.forName(userPickerProviderString)
-				.getConstructor(Map.class);
-		appTokenStorage = (AppTokenStorage) constructor.newInstance(initInfo);
-	}
-
 	private void createAndSetGatekeeperTokenProvider() {
 		String baseUrl = getInitParameter("gatekeeperURL");
 		HttpHandlerFactory httpHandlerFactory = new HttpHandlerFactoryImp();
-		AppTokenInstanceProvider.setGatekeeperTokenProvider(GatekeeperTokenProviderImp
+		IdpLoginInstanceProvider.setGatekeeperTokenProvider(GatekeeperTokenProviderImp
 				.usingBaseUrlAndHttpHandlerFactory(baseUrl, httpHandlerFactory));
 	}
 

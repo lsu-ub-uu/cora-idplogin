@@ -17,23 +17,26 @@
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package se.uu.ub.cora.apptokenverifier;
+package se.uu.ub.cora.idplogin.initialize;
 
-import se.uu.ub.cora.gatekeepertokenprovider.AuthToken;
 import se.uu.ub.cora.gatekeepertokenprovider.GatekeeperTokenProvider;
-import se.uu.ub.cora.gatekeepertokenprovider.UserInfo;
 
-public class GatekeeperTokenProviderSpy implements GatekeeperTokenProvider {
+public final class IdpLoginInstanceProvider {
 
-	@Override
-	public AuthToken getAuthTokenForUserInfo(UserInfo userInfo) {
-		return AuthToken.withIdAndValidForNoSeconds("someAuthToken", 278);
+	private static GatekeeperTokenProvider gatekeeperTokenProvider;
+
+	private IdpLoginInstanceProvider() {
+		// not called
+		throw new UnsupportedOperationException();
 	}
 
-	@Override
-	public void removeAuthTokenForUser(String idInUserStorage, String authToken) {
-		// TODO Auto-generated method stub
+	public static void setGatekeeperTokenProvider(GatekeeperTokenProvider gatekeeperTokenProvider) {
+		IdpLoginInstanceProvider.gatekeeperTokenProvider = gatekeeperTokenProvider;
 
+	}
+
+	public static GatekeeperTokenProvider getGatekeeperTokenProvider() {
+		return gatekeeperTokenProvider;
 	}
 
 }

@@ -17,12 +17,9 @@
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package se.uu.ub.cora.apptokenverifier;
+package se.uu.ub.cora.idplogin;
 
 import static org.testng.Assert.assertEquals;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -31,26 +28,21 @@ import javax.ws.rs.core.UriInfo;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import se.uu.ub.cora.apptokenstorage.AppTokenStorage;
-import se.uu.ub.cora.apptokenverifier.initialize.AppTokenInstanceProvider;
+import se.uu.ub.cora.idplogin.initialize.IdpLoginInstanceProvider;
 
-public class AppTokenEndpointTest {
+public class IdpLoginEndpointTest {
 	private Response response;
 
 	@BeforeMethod
 	public void setup() {
-		Map<String, String> initInfo = new HashMap<>();
-		initInfo.put("storageOnDiskBasePath", "/mnt/data/basicstorage");
-		AppTokenStorage appTokenStorage = new AppTokenStorageSpy(initInfo);
-		AppTokenInstanceProvider.setApptokenStorage(appTokenStorage);
 		GatekeeperTokenProviderSpy gatekeeperTokenProvider = new GatekeeperTokenProviderSpy();
-		AppTokenInstanceProvider.setGatekeeperTokenProvider(gatekeeperTokenProvider);
+		IdpLoginInstanceProvider.setGatekeeperTokenProvider(gatekeeperTokenProvider);
 	}
 
 	@Test
 	public void testGetAuthTokenForAppToken() {
 		UriInfo uriInfo = new TestUri();
-		AppTokenEndpoint appTokenEndpoint = new AppTokenEndpoint(uriInfo);
+		IdpLoginEndpoint appTokenEndpoint = new IdpLoginEndpoint(uriInfo);
 
 		String userId = "someUserId";
 		String appToken = "someAppToken";
@@ -59,7 +51,8 @@ public class AppTokenEndpointTest {
 		assertResponseStatusIs(Response.Status.CREATED);
 		String expectedJsonToken = "{\"data\":{\"children\":["
 				+ "{\"name\":\"id\",\"value\":\"someAuthToken\"},"
-				+ "{\"name\":\"validForNoSeconds\",\"value\":\"278\"}]"
+				+ "{\"name\":\"validForNoSeconds\",\"value\":\"278\"},"
+				+ "{\"name\":\"idInUserStorage\",\"value\":\"someIdInUserStorage\"}]"
 				+ ",\"name\":\"authToken\"},"
 				+ "\"actionLinks\":{\"delete\":{\"requestMethod\":\"DELETE\","
 				+ "\"rel\":\"delete\","
@@ -73,35 +66,11 @@ public class AppTokenEndpointTest {
 	}
 
 	@Test
-	public void testGetAuthTokenForAppTokenUserIdNotFound() {
-		UriInfo uriInfo = new TestUri();
-		AppTokenEndpoint appTokenEndpoint = new AppTokenEndpoint(uriInfo);
-
-		String userId = "someUserIdNotFound";
-		String appToken = "someAppToken";
-
-		response = appTokenEndpoint.getAuthTokenForAppToken(userId, appToken);
-		assertResponseStatusIs(Response.Status.NOT_FOUND);
-	}
-
-	@Test
-	public void testGetAuthTokenForAppTokenNotFound() {
-		UriInfo uriInfo = new TestUri();
-		AppTokenEndpoint appTokenEndpoint = new AppTokenEndpoint(uriInfo);
-
-		String userId = "someUserId";
-		String appToken = "someAppTokenNotFound";
-
-		response = appTokenEndpoint.getAuthTokenForAppToken(userId, appToken);
-		assertResponseStatusIs(Response.Status.NOT_FOUND);
-	}
-
-	@Test
 	public void testGetAuthTokenForAppTokenErrorFromGatekeeper() {
 		GatekeeperTokenProviderErrorSpy gatekeeperTokenProvider = new GatekeeperTokenProviderErrorSpy();
-		AppTokenInstanceProvider.setGatekeeperTokenProvider(gatekeeperTokenProvider);
+		IdpLoginInstanceProvider.setGatekeeperTokenProvider(gatekeeperTokenProvider);
 		UriInfo uriInfo = new TestUri();
-		AppTokenEndpoint appTokenEndpoint = new AppTokenEndpoint(uriInfo);
+		IdpLoginEndpoint appTokenEndpoint = new IdpLoginEndpoint(uriInfo);
 
 		String userId = "someUserId";
 		String appToken = "someAppToken";
@@ -113,7 +82,7 @@ public class AppTokenEndpointTest {
 	@Test
 	public void testRemoveAuthTokenForUser() {
 		UriInfo uriInfo = new TestUri();
-		AppTokenEndpoint appTokenEndpoint = new AppTokenEndpoint(uriInfo);
+		IdpLoginEndpoint appTokenEndpoint = new IdpLoginEndpoint(uriInfo);
 
 		String userId = "someUserId";
 		String authToken = "someAuthToken";
@@ -125,10 +94,10 @@ public class AppTokenEndpointTest {
 	@Test
 	public void testRemoveAuthTokenForUserWrongToken() {
 		GatekeeperTokenProviderErrorSpy gatekeeperTokenProvider = new GatekeeperTokenProviderErrorSpy();
-		AppTokenInstanceProvider.setGatekeeperTokenProvider(gatekeeperTokenProvider);
+		IdpLoginInstanceProvider.setGatekeeperTokenProvider(gatekeeperTokenProvider);
 
 		UriInfo uriInfo = new TestUri();
-		AppTokenEndpoint appTokenEndpoint = new AppTokenEndpoint(uriInfo);
+		IdpLoginEndpoint appTokenEndpoint = new IdpLoginEndpoint(uriInfo);
 
 		String userId = "someUserId";
 		String authToken = "someAuthTokenNotFound";

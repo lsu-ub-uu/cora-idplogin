@@ -1,5 +1,5 @@
 /*
- * Copyright 2016, 2017 Uppsala University Library
+ * Copyright 2017 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -17,7 +17,7 @@
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package se.uu.ub.cora.apptokenverifier.json;
+package se.uu.ub.cora.idplogin.json;
 
 import static org.testng.Assert.assertEquals;
 
@@ -29,11 +29,13 @@ public class AuthTokenToJsonConverterTest {
 	@Test
 	public void testAuthTokenToJsonConverter() {
 		String url = "http://epc.ub.uu.se/apptokenverifier/rest/apptoken/131313";
-		AuthToken authToken = AuthToken.withIdAndValidForNoSeconds("someId", 599);
+		AuthToken authToken = AuthToken.withIdAndValidForNoSecondsAndIdInUserStorage("someId", 599,
+				"someIdInUserStorage");
 		AuthTokenToJsonConverter converter = new AuthTokenToJsonConverter(authToken, url);
 		String json = converter.convertAuthTokenToJson();
 		String expected = "{\"data\":{\"children\":[" + "{\"name\":\"id\",\"value\":\"someId\"},"
-				+ "{\"name\":\"validForNoSeconds\",\"value\":\"599\"}]"
+				+ "{\"name\":\"validForNoSeconds\",\"value\":\"599\"},"
+				+ "{\"name\":\"idInUserStorage\",\"value\":\"someIdInUserStorage\"}" + "]"
 				+ ",\"name\":\"authToken\"},"
 				+ "\"actionLinks\":{\"delete\":{\"requestMethod\":\"DELETE\","
 				+ "\"rel\":\"delete\","

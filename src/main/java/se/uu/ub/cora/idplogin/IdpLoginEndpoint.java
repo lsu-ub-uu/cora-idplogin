@@ -17,7 +17,7 @@
  *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package se.uu.ub.cora.apptokenverifier;
+package se.uu.ub.cora.idplogin;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -32,20 +32,19 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import se.uu.ub.cora.apptokenstorage.AppTokenStorage;
-import se.uu.ub.cora.apptokenverifier.initialize.AppTokenInstanceProvider;
-import se.uu.ub.cora.apptokenverifier.json.AuthTokenToJsonConverter;
 import se.uu.ub.cora.gatekeepertokenprovider.AuthToken;
 import se.uu.ub.cora.gatekeepertokenprovider.GatekeeperTokenProvider;
 import se.uu.ub.cora.gatekeepertokenprovider.UserInfo;
+import se.uu.ub.cora.idplogin.initialize.IdpLoginInstanceProvider;
+import se.uu.ub.cora.idplogin.json.AuthTokenToJsonConverter;
 
-@Path("apptoken")
-public class AppTokenEndpoint {
+@Path("idplogin")
+public class IdpLoginEndpoint {
 
 	private UriInfo uriInfo;
 	private String url;
 
-	public AppTokenEndpoint(@Context UriInfo uriInfo) {
+	public IdpLoginEndpoint(@Context UriInfo uriInfo) {
 		this.uriInfo = uriInfo;
 		url = getBaseURLFromURI();
 	}
@@ -67,19 +66,11 @@ public class AppTokenEndpoint {
 
 	private Response tryToGetAuthTokenForAppToken(String userId, String appToken)
 			throws URISyntaxException {
-		checkAppTokenIsValid(userId, appToken);
 		return getNewAuthTokenFromGatekeeper(userId);
 	}
 
-	private void checkAppTokenIsValid(String userId, String appToken) {
-		AppTokenStorage appTokenStorage = AppTokenInstanceProvider.getApptokenStorage();
-		if (!appTokenStorage.userIdHasAppToken(userId, appToken)) {
-			throw new NotFoundException();
-		}
-	}
-
 	private Response getNewAuthTokenFromGatekeeper(String userId) throws URISyntaxException {
-		GatekeeperTokenProvider gatekeeperTokenProvider = AppTokenInstanceProvider
+		GatekeeperTokenProvider gatekeeperTokenProvider = IdpLoginInstanceProvider
 				.getGatekeeperTokenProvider();
 
 		UserInfo userInfo = UserInfo.withIdInUserStorage(userId);
@@ -116,7 +107,7 @@ public class AppTokenEndpoint {
 	}
 
 	private Response tryToRemoveAuthTokenForUser(String userId, String authToken) {
-		GatekeeperTokenProvider gatekeeperTokenProvider = AppTokenInstanceProvider
+		GatekeeperTokenProvider gatekeeperTokenProvider = IdpLoginInstanceProvider
 				.getGatekeeperTokenProvider();
 		gatekeeperTokenProvider.removeAuthTokenForUser(userId, authToken);
 		return buildResponse(Status.OK);

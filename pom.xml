@@ -1,12 +1,21 @@
-<!-- ~ Copyright 2015 Uppsala University Library ~ ~ This file is part of 
-	Cora. ~ ~ Cora is free software: you can redistribute it and/or modify ~ 
-	it under the terms of the GNU General Public License as published by ~ the 
-	Free Software Foundation, either version 3 of the License, or ~ (at your 
-	option) any later version. ~ ~ Cora is distributed in the hope that it will 
-	be useful, ~ but WITHOUT ANY WARRANTY; without even the implied warranty 
-	of ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the ~ GNU General 
-	Public License for more details. ~ ~ You should have received a copy of the 
-	GNU General Public License ~ along with Cora. If not, see <http://www.gnu.org/licenses/>. -->
+<!--
+  ~ Copyright 2017 Uppsala University Library
+  ~
+  ~ This file is part of Cora.
+  ~
+  ~     Cora is free software: you can redistribute it and/or modify
+  ~     it under the terms of the GNU General Public License as published by
+  ~     the Free Software Foundation, either version 3 of the License, or
+  ~     (at your option) any later version.
+  ~
+  ~     Cora is distributed in the hope that it will be useful,
+  ~     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~     GNU General Public License for more details.
+  ~
+  ~     You should have received a copy of the GNU General Public License
+  ~     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
+  -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -18,23 +27,22 @@
 		<version>0.6-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>apptokenverifier</artifactId>
-	<version>0.3-SNAPSHOT</version>
+	<artifactId>idplogin</artifactId>
+	<version>0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
 
-	<name>apptokenverifier</name>
+	<name>idplogin</name>
 
 	<properties>
-		<apptokenstorage.version>0.3-SNAPSHOT</apptokenstorage.version>
 		<gatekeepertokenprovider.version>0.3-SNAPSHOT</gatekeepertokenprovider.version>
 		<javax.ws.rs.version>2.0.1</javax.ws.rs.version>
 		<jersey.version>2.25</jersey.version>
 	</properties>
 
 	<scm>
-		<connection>scm:git:https://git.epc.ub.uu.se/epc/apptokenverifier.git</connection>
-		<developerConnection>scm:git:https://git.epc.ub.uu.se/epc/apptokenverifier.git</developerConnection>
-		<url>https://git.epc.ub.uu.se/epc/apptokenverifier.git</url>
+		<connection>scm:git:https://git.epc.ub.uu.se/epc/idplogin.git</connection>
+		<developerConnection>scm:git:https://git.epc.ub.uu.se/epc/idplogin.git</developerConnection>
+		<url>https://git.epc.ub.uu.se/epc/idplogin.git</url>
 	</scm>
 
 	<repositories>
@@ -53,12 +61,6 @@
 	</repositories>
 
 	<dependencies>
-		<dependency>
-			<groupId>se.uu.ub.cora</groupId>
-			<artifactId>apptokenstorage</artifactId>
-			<version>${apptokenstorage.version}</version>
-			<scope>provided</scope>
-		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>gatekeepertokenprovider</artifactId>
@@ -91,6 +93,6 @@
 		</dependency>
 	</dependencies>
 	<build>
-		<finalName>apptokenverifier</finalName>
+		<finalName>idplogin</finalName>
 	</build>
 </project>
