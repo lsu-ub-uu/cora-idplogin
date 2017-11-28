@@ -63,7 +63,7 @@ public class IdpLoginServlet extends HttpServlet {
 		out.println("<body>");
 		out.println("</body></html>");
 		// } finally {
-		out.close(); // Always close the output writer
+		out.close();
 		// }
 	}
 
