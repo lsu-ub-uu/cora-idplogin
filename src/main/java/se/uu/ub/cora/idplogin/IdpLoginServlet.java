@@ -21,11 +21,13 @@ public class IdpLoginServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		String userIdFromIdp = request.getHeader("eppn");
-		UserInfo userInfo = UserInfo.withLoginId(userIdFromIdp);
+		// UserInfo userInfo = UserInfo.withLoginId(userIdFromIdp);
+		UserInfo userInfo = UserInfo.withIdInUserStorage("141414");
 		AuthToken authTokenFromGatekeeper = getNewAuthTokenFromGatekeeper(userInfo);
 		String authToken = authTokenFromGatekeeper.token;
 		int validForNoSeconds = authTokenFromGatekeeper.validForNoSeconds;
 		String idInUserStorage = authTokenFromGatekeeper.idInUserStorage;
+
 		createAnswerHtmlToResponseUsingAuthToken(response, authToken, validForNoSeconds,
 				idInUserStorage);
 	}

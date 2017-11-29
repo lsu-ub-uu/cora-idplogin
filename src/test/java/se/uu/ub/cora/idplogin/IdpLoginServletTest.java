@@ -57,7 +57,8 @@ public class IdpLoginServletTest {
 		loginServlet.doGet(requestSpy, responseSpy);
 
 		UserInfo userInfo = gatekeeperTokenProvider.userInfos.get(0);
-		assertEquals(userInfo.idFromLogin, "test@testing.org");
+		// assertEquals(userInfo.idFromLogin, "test@testing.org");
+		assertEquals(userInfo.idInUserStorage, "141414");
 	}
 
 	@Test
