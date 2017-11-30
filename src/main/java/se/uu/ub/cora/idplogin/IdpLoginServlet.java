@@ -28,12 +28,45 @@ public class IdpLoginServlet extends HttpServlet {
 		int validForNoSeconds = authTokenFromGatekeeper.validForNoSeconds;
 		String idInUserStorage = authTokenFromGatekeeper.idInUserStorage;
 
+		String url = getBaseURLWithCorrectProtocolFromRequest(request);
+		// url += "/141414";
+
 		createAnswerHtmlToResponseUsingAuthToken(response, authToken, validForNoSeconds,
-				idInUserStorage);
+				idInUserStorage, url);
+	}
+
+	private String getBaseURLWithCorrectProtocolFromRequest(HttpServletRequest request) {
+		String baseURL = getBaseURLFromRequest(request);
+
+		baseURL = changeHttpToHttpsIfHeaderSaysSo(request, baseURL);
+
+		return baseURL;
+	}
+
+	private String getBaseURLFromRequest(HttpServletRequest request) {
+		String tempUrl = request.getRequestURL().toString();
+		// String baseURL = tempUrl.substring(0, tempUrl.lastIndexOf(request.getPathInfo()));
+		// baseURL += "/apptoken/";
+		// return baseURL;
+		return tempUrl + "/";
+	}
+
+	private String changeHttpToHttpsIfHeaderSaysSo(HttpServletRequest request, String baseURI) {
+		String forwardedProtocol = request.getHeader("X-Forwarded-Proto");
+
+		if (ifForwardedProtocolExists(forwardedProtocol)) {
+			return baseURI.replaceAll("http", forwardedProtocol);
+		}
+		return baseURI;
+	}
+
+	private boolean ifForwardedProtocolExists(String forwardedProtocol) {
+		return null != forwardedProtocol && !"".equals(forwardedProtocol);
 	}
 
 	private void createAnswerHtmlToResponseUsingAuthToken(HttpServletResponse response,
-			String authToken, int validForNoSeconds, String idInUserStorage) throws IOException {
+			String authToken, int validForNoSeconds, String idInUserStorage, String url)
+			throws IOException {
 		PrintWriter out = response.getWriter();
 		out.println("<!DOCTYPE html>");
 		out.println("<html><head>");
@@ -54,7 +87,7 @@ public class IdpLoginServlet extends HttpServlet {
 		out.println("\"delete\" : {");
 		out.println("\"requestMethod\" : \"DELETE\",");
 		out.println("\"rel\" : \"delete\",");
-		out.print("\"url\" : \"http://localhost:8080/apptokenverifier/rest/apptoken/");
+		out.print("\"url\" : \"" + url);
 		out.print(idInUserStorage);
 		out.println("\"");
 		out.println("}");
