@@ -23,7 +23,6 @@ import static org.testng.Assert.assertEquals;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriInfo;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -45,8 +44,7 @@ public class IdpLoginEndpointTest {
 
 	@Test
 	public void testRemoveAuthTokenForUser() {
-		UriInfo uriInfo = new TestUri();
-		IdpLoginEndpoint appTokenEndpoint = new IdpLoginEndpoint(uriInfo);
+		IdpLoginEndpoint appTokenEndpoint = new IdpLoginEndpoint();
 
 		String userId = "someUserId";
 		String authToken = "someAuthToken";
@@ -60,8 +58,7 @@ public class IdpLoginEndpointTest {
 		GatekeeperTokenProviderErrorSpy gatekeeperTokenProvider = new GatekeeperTokenProviderErrorSpy();
 		IdpLoginInstanceProvider.setGatekeeperTokenProvider(gatekeeperTokenProvider);
 
-		UriInfo uriInfo = new TestUri();
-		IdpLoginEndpoint appTokenEndpoint = new IdpLoginEndpoint(uriInfo);
+		IdpLoginEndpoint appTokenEndpoint = new IdpLoginEndpoint();
 
 		String userId = "someUserId";
 		String authToken = "someAuthTokenNotFound";
