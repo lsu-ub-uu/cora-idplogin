@@ -62,6 +62,20 @@ public class IdpLoginServletTest {
 	}
 
 	@Test
+	public void testGetCreatesCorrectHtmlAnswerOverHttps() throws Exception {
+		requestSpy.headers.put("X-Forwarded-Proto", "https");
+		requestSpy.headers.put("eppn", "test@testing.org");
+		loginServlet.doGet(requestSpy, responseSpy);
+
+		String authToken = "someAuthToken";
+		String validForNoSeconds = "278";
+		String idInUserStorage = "someIdInUserStorage";
+
+		String expectedHtml = createExpectedHtml(authToken, validForNoSeconds, idInUserStorage);
+		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
+	}
+
+	@Test
 	public void testGetCreatesCorrectHtmlAnswer() throws Exception {
 		requestSpy.headers.put("eppn", "test@testing.org");
 		loginServlet.doGet(requestSpy, responseSpy);

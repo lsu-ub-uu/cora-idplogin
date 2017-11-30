@@ -55,7 +55,7 @@ public class IdpLoginServlet extends HttpServlet {
 		String forwardedProtocol = request.getHeader("X-Forwarded-Proto");
 
 		if (ifForwardedProtocolExists(forwardedProtocol)) {
-			return baseURI.replaceAll("http", forwardedProtocol);
+			return baseURI.replaceAll("http:", forwardedProtocol + ":");
 		}
 		return baseURI;
 	}
