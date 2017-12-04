@@ -29,7 +29,7 @@ import org.testng.annotations.Test;
 
 import se.uu.ub.cora.idplogin.initialize.IdpLoginInstanceProvider;
 
-public class IdpLoginEndpointTest {
+public class IdpLogoutEndpointTest {
 	private Response response;
 
 	@BeforeMethod
@@ -44,7 +44,7 @@ public class IdpLoginEndpointTest {
 
 	@Test
 	public void testRemoveAuthTokenForUser() {
-		IdpLoginEndpoint appTokenEndpoint = new IdpLoginEndpoint();
+		IdpLogoutEndpoint appTokenEndpoint = new IdpLogoutEndpoint();
 
 		String userId = "someUserId";
 		String authToken = "someAuthToken";
@@ -58,7 +58,7 @@ public class IdpLoginEndpointTest {
 		GatekeeperTokenProviderErrorSpy gatekeeperTokenProvider = new GatekeeperTokenProviderErrorSpy();
 		IdpLoginInstanceProvider.setGatekeeperTokenProvider(gatekeeperTokenProvider);
 
-		IdpLoginEndpoint appTokenEndpoint = new IdpLoginEndpoint();
+		IdpLogoutEndpoint appTokenEndpoint = new IdpLogoutEndpoint();
 
 		String userId = "someUserId";
 		String authToken = "someAuthTokenNotFound";

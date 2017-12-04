@@ -28,8 +28,8 @@ import javax.ws.rs.core.Response.Status;
 import se.uu.ub.cora.gatekeepertokenprovider.GatekeeperTokenProvider;
 import se.uu.ub.cora.idplogin.initialize.IdpLoginInstanceProvider;
 
-@Path("idplogin")
-public class IdpLoginEndpoint {
+@Path("idplogout")
+public class IdpLogoutEndpoint {
 
 	private Response buildResponse(Status status) {
 		return Response.status(status).build();
