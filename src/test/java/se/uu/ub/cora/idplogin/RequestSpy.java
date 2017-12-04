@@ -348,7 +348,7 @@ public class RequestSpy implements HttpServletRequest {
 
 	@Override
 	public StringBuffer getRequestURL() {
-		return new StringBuffer("https://epc.ub.uu.se/idplogin/idplogin");
+		return new StringBuffer("https://epc.ub.uu.se/idplogin/login");
 	}
 
 	@Override
@@ -359,8 +359,7 @@ public class RequestSpy implements HttpServletRequest {
 
 	@Override
 	public String getServletPath() {
-		// TODO Auto-generated method stub
-		return null;
+		return "/login";
 	}
 
 	@Override

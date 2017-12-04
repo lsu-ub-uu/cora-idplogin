@@ -28,7 +28,7 @@ import javax.ws.rs.core.Response.Status;
 import se.uu.ub.cora.gatekeepertokenprovider.GatekeeperTokenProvider;
 import se.uu.ub.cora.idplogin.initialize.IdpLoginInstanceProvider;
 
-@Path("idplogout")
+@Path("logout")
 public class IdpLogoutEndpoint {
 
 	private Response buildResponse(Status status) {

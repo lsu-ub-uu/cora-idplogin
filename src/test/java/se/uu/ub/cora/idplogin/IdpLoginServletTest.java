@@ -120,7 +120,7 @@ public class IdpLoginServletTest {
 		sb.append("\n");
 		sb.append("\"rel\" : \"delete\",");
 		sb.append("\n");
-		sb.append("\"url\" : \"https://epc.ub.uu.se/idplogin/idplogout/" + idInUserStorage + "\"");
+		sb.append("\"url\" : \"https://epc.ub.uu.se/idplogin/logout/" + idInUserStorage + "\"");
 		sb.append("\n");
 		sb.append("}");
 		sb.append("\n");

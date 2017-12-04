@@ -44,7 +44,7 @@
   </servlet>
   <servlet-mapping>
     <servlet-name>idplogin</servlet-name>
-    <url-pattern>/idplogin/*</url-pattern>
+    <url-pattern>/login/*</url-pattern>
   </servlet-mapping>
  
   <filter>
