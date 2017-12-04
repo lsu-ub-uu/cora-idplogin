@@ -45,10 +45,9 @@ public class IdpLoginServlet extends HttpServlet {
 
 	private String getBaseURLFromRequest(HttpServletRequest request) {
 		String tempUrl = request.getRequestURL().toString();
-		// String baseURL = tempUrl.substring(0, tempUrl.lastIndexOf(request.getPathInfo()));
-		// baseURL += "/apptoken/";
-		// return baseURL;
-		return tempUrl + "/";
+		String baseURL = tempUrl.substring(0, tempUrl.lastIndexOf(request.getPathInfo()));
+		baseURL += "idplogout/";
+		return baseURL;
 	}
 
 	private String changeHttpToHttpsIfHeaderSaysSo(HttpServletRequest request, String baseURI) {
