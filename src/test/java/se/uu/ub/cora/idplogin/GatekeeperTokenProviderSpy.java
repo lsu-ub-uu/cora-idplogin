@@ -33,8 +33,8 @@ public class GatekeeperTokenProviderSpy implements GatekeeperTokenProvider {
 	@Override
 	public AuthToken getAuthTokenForUserInfo(UserInfo userInfo) {
 		userInfos.add(userInfo);
-		return AuthToken.withIdAndValidForNoSecondsAndIdInUserStorage("someAuthToken", 278,
-				"someIdInUserStorage");
+		return AuthToken.withIdAndValidForNoSecondsAndIdInUserStorage("someAuth'Token", 278,
+				"someIdInUser'Storage");
 	}
 
 	@Override

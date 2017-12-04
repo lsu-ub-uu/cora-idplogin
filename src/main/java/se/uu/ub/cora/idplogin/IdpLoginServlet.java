@@ -8,6 +8,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.owasp.encoder.Encode;
+
 import se.uu.ub.cora.gatekeepertokenprovider.AuthToken;
 import se.uu.ub.cora.gatekeepertokenprovider.GatekeeperTokenProvider;
 import se.uu.ub.cora.gatekeepertokenprovider.UserInfo;
@@ -20,8 +22,6 @@ public class IdpLoginServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		String userIdFromIdp = request.getHeader("eppn");
-		// UserInfo userInfo = UserInfo.withLoginId(userIdFromIdp);
 		UserInfo userInfo = UserInfo.withIdInUserStorage("141414");
 		AuthToken authTokenFromGatekeeper = getNewAuthTokenFromGatekeeper(userInfo);
 		String authToken = authTokenFromGatekeeper.token;
@@ -29,7 +29,6 @@ public class IdpLoginServlet extends HttpServlet {
 		String idInUserStorage = authTokenFromGatekeeper.idInUserStorage;
 
 		String url = getBaseURLWithCorrectProtocolFromRequest(request);
-		// url += "/141414";
 
 		createAnswerHtmlToResponseUsingAuthToken(response, authToken, validForNoSeconds,
 				idInUserStorage, url);
@@ -78,7 +77,7 @@ public class IdpLoginServlet extends HttpServlet {
 		out.println("var authInfo = {");
 		out.println("\"userId\" : \"Webredirect fake login\",");
 		out.print("\"token\" : \"");
-		out.print(authToken);
+		out.print(Encode.forJavaScript(authToken));
 		out.println("\",");
 		out.print("\"validForNoSeconds\" : \"");
 		out.print(validForNoSeconds);
@@ -87,8 +86,8 @@ public class IdpLoginServlet extends HttpServlet {
 		out.println("\"delete\" : {");
 		out.println("\"requestMethod\" : \"DELETE\",");
 		out.println("\"rel\" : \"delete\",");
-		out.print("\"url\" : \"" + url);
-		out.print(idInUserStorage);
+		out.print("\"url\" : \"" + Encode.forJavaScript(url));
+		out.print(Encode.forJavaScript(idInUserStorage));
 		out.println("\"");
 		out.println("}");
 		out.println("}");

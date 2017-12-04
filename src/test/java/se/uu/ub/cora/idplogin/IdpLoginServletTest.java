@@ -36,6 +36,9 @@ public class IdpLoginServletTest {
 	private IdpLoginServlet loginServlet;
 	private RequestSpy requestSpy;
 	private ResponseSpy responseSpy;
+	private String authToken;
+	private String validForNoSeconds;
+	private String idInUserStorage;
 
 	@BeforeMethod
 	public void setup() {
@@ -44,6 +47,11 @@ public class IdpLoginServletTest {
 		loginServlet = new IdpLoginServlet();
 		requestSpy = new RequestSpy();
 		responseSpy = new ResponseSpy();
+
+		authToken = "someAuth\\x27Token";
+		validForNoSeconds = "278";
+		idInUserStorage = "someIdInUser\\x27Storage";
+
 	}
 
 	@Test
@@ -67,9 +75,24 @@ public class IdpLoginServletTest {
 		requestSpy.headers.put("eppn", "test@testing.org");
 		loginServlet.doGet(requestSpy, responseSpy);
 
-		String authToken = "someAuthToken";
-		String validForNoSeconds = "278";
-		String idInUserStorage = "someIdInUserStorage";
+		String expectedHtml = createExpectedHtml(authToken, validForNoSeconds, idInUserStorage);
+		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
+	}
+
+	@Test
+	public void testGetCreatesCorrectHtmlAnswerOverHttpForEmptyHeader() throws Exception {
+		requestSpy.headers.put("X-Forwarded-Proto", "");
+		requestSpy.headers.put("eppn", "test@testing.org");
+		loginServlet.doGet(requestSpy, responseSpy);
+
+		String expectedHtml = createExpectedHtml(authToken, validForNoSeconds, idInUserStorage);
+		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
+	}
+
+	@Test
+	public void testGetCreatesCorrectHtmlAnswerOverHttpForMissingHeader() throws Exception {
+		requestSpy.headers.put("eppn", "test@testing.org");
+		loginServlet.doGet(requestSpy, responseSpy);
 
 		String expectedHtml = createExpectedHtml(authToken, validForNoSeconds, idInUserStorage);
 		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
@@ -79,10 +102,6 @@ public class IdpLoginServletTest {
 	public void testGetCreatesCorrectHtmlAnswer() throws Exception {
 		requestSpy.headers.put("eppn", "test@testing.org");
 		loginServlet.doGet(requestSpy, responseSpy);
-
-		String authToken = "someAuthToken";
-		String validForNoSeconds = "278";
-		String idInUserStorage = "someIdInUserStorage";
 
 		String expectedHtml = createExpectedHtml(authToken, validForNoSeconds, idInUserStorage);
 		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
@@ -120,8 +139,8 @@ public class IdpLoginServletTest {
 		sb.append("\n");
 		sb.append("\"rel\" : \"delete\",");
 		sb.append("\n");
-		sb.append(
-				"\"url\" : \"https://epc.ub.uu.se/idplogin/rest/logout/" + idInUserStorage + "\"");
+		sb.append("\"url\" : \"https:\\/\\/epc.ub.uu.se\\/idplogin\\/rest\\/logout\\/"
+				+ idInUserStorage + "\"");
 		sb.append("\n");
 		sb.append("}");
 		sb.append("\n");
