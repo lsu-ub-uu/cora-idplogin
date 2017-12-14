@@ -22,7 +22,8 @@ public class IdpLoginServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		UserInfo userInfo = UserInfo.withIdInUserStorage("141414");
+		String userIdFromIdp = request.getHeader("eppn");
+		UserInfo userInfo = UserInfo.withLoginId(userIdFromIdp);
 		AuthToken authTokenFromGatekeeper = getNewAuthTokenFromGatekeeper(userInfo);
 		String authToken = authTokenFromGatekeeper.token;
 		int validForNoSeconds = authTokenFromGatekeeper.validForNoSeconds;
@@ -30,8 +31,8 @@ public class IdpLoginServlet extends HttpServlet {
 
 		String url = getBaseURLWithCorrectProtocolFromRequest(request);
 
-		createAnswerHtmlToResponseUsingAuthToken(response, authToken, validForNoSeconds,
-				idInUserStorage, url);
+		createAnswerHtmlToResponseUsingAuthToken(response, authToken, validForNoSeconds, idInUserStorage,
+				url);
 	}
 
 	private String getBaseURLWithCorrectProtocolFromRequest(HttpServletRequest request) {
@@ -63,9 +64,8 @@ public class IdpLoginServlet extends HttpServlet {
 		return null != forwardedProtocol && !"".equals(forwardedProtocol);
 	}
 
-	private void createAnswerHtmlToResponseUsingAuthToken(HttpServletResponse response,
-			String authToken, int validForNoSeconds, String idInUserStorage, String url)
-			throws IOException {
+	private void createAnswerHtmlToResponseUsingAuthToken(HttpServletResponse response, String authToken,
+			int validForNoSeconds, String idInUserStorage, String url) throws IOException {
 		PrintWriter out = response.getWriter();
 		out.println("<!DOCTYPE html>");
 		out.println("<html><head>");

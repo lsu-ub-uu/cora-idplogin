@@ -65,8 +65,8 @@ public class IdpLoginServletTest {
 		loginServlet.doGet(requestSpy, responseSpy);
 
 		UserInfo userInfo = gatekeeperTokenProvider.userInfos.get(0);
-		// assertEquals(userInfo.idFromLogin, "test@testing.org");
-		assertEquals(userInfo.idInUserStorage, "141414");
+		assertEquals(userInfo.idFromLogin, "test@testing.org");
+		// assertEquals(userInfo.idInUserStorage, "141414");
 	}
 
 	@Test
@@ -139,8 +139,8 @@ public class IdpLoginServletTest {
 		sb.append("\n");
 		sb.append("\"rel\" : \"delete\",");
 		sb.append("\n");
-		sb.append("\"url\" : \"https:\\/\\/epc.ub.uu.se\\/idplogin\\/rest\\/logout\\/"
-				+ idInUserStorage + "\"");
+		sb.append("\"url\" : \"https:\\/\\/epc.ub.uu.se\\/idplogin\\/rest\\/logout\\/" + idInUserStorage
+				+ "\"");
 		sb.append("\n");
 		sb.append("}");
 		sb.append("\n");
