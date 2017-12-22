@@ -25,13 +25,10 @@ public class IdpLoginServlet extends HttpServlet {
 		String userIdFromIdp = request.getHeader("eppn");
 		UserInfo userInfo = UserInfo.withLoginId(userIdFromIdp);
 		AuthToken authTokenFromGatekeeper = getNewAuthTokenFromGatekeeper(userInfo);
-		String authToken = authTokenFromGatekeeper.token;
-		int validForNoSeconds = authTokenFromGatekeeper.validForNoSeconds;
-		String idInUserStorage = authTokenFromGatekeeper.idInUserStorage;
 
 		String url = getBaseURLWithCorrectProtocolFromRequest(request);
 
-		createAnswerHtmlToResponseUsingAuthToken(response, authToken, validForNoSeconds, idInUserStorage,
+		createAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrl(response, authTokenFromGatekeeper,
 				url);
 	}
 
@@ -64,8 +61,8 @@ public class IdpLoginServlet extends HttpServlet {
 		return null != forwardedProtocol && !"".equals(forwardedProtocol);
 	}
 
-	private void createAnswerHtmlToResponseUsingAuthToken(HttpServletResponse response, String authToken,
-			int validForNoSeconds, String idInUserStorage, String url) throws IOException {
+	private void createAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrl(HttpServletResponse response,
+			AuthToken authToken, String url) throws IOException {
 		PrintWriter out = response.getWriter();
 		out.println("<!DOCTYPE html>");
 		out.println("<html><head>");
@@ -77,17 +74,20 @@ public class IdpLoginServlet extends HttpServlet {
 		out.println("var authInfo = {");
 		out.println("\"userId\" : \"Webredirect fake login\",");
 		out.print("\"token\" : \"");
-		out.print(Encode.forJavaScript(authToken));
+		out.print(Encode.forJavaScript(authToken.token));
+		out.println("\",");
+		out.print("\"idFromLogin\" : \"");
+		out.print(Encode.forJavaScript(authToken.idFromLogin));
 		out.println("\",");
 		out.print("\"validForNoSeconds\" : \"");
-		out.print(validForNoSeconds);
+		out.print(authToken.validForNoSeconds);
 		out.println("\",");
 		out.println("\"actionLinks\" : {");
 		out.println("\"delete\" : {");
 		out.println("\"requestMethod\" : \"DELETE\",");
 		out.println("\"rel\" : \"delete\",");
 		out.print("\"url\" : \"" + Encode.forJavaScript(url));
-		out.print(Encode.forJavaScript(idInUserStorage));
+		out.print(Encode.forJavaScript(authToken.idInUserStorage));
 		out.println("\"");
 		out.println("}");
 		out.println("}");

@@ -129,6 +129,8 @@ public class IdpLoginServletTest {
 		sb.append("\n");
 		sb.append("\"token\" : \"" + authToken + "\",");
 		sb.append("\n");
+		sb.append("\"idFromLogin\" : \"someIdFromLogin\",");
+		sb.append("\n");
 		sb.append("\"validForNoSeconds\" : \"" + validForNoSeconds + "\",");
 		sb.append("\n");
 		sb.append("\"actionLinks\" : {");
