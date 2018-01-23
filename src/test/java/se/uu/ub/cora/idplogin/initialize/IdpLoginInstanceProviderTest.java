@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Uppsala University Library
+ * Copyright 2017, 2018 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -25,6 +25,8 @@ import static org.testng.Assert.assertTrue;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.testng.annotations.Test;
 
@@ -56,4 +58,10 @@ public class IdpLoginInstanceProviderTest {
 				gatekeeperTokenProvider);
 	}
 
+	@Test
+	public void testSetInitInfo() throws Exception {
+		Map<String, String> initInfo = new HashMap<>();
+		IdpLoginInstanceProvider.setInitInfo(initInfo);
+		assertEquals(IdpLoginInstanceProvider.getInitInfo(), initInfo);
+	}
 }

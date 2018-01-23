@@ -1,3 +1,21 @@
+/*
+ * Copyright 2017, 2018 Uppsala University Library
+ *
+ * This file is part of Cora.
+ *
+ *     Cora is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Cora is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with Cora.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package se.uu.ub.cora.idplogin;
 
 import java.io.IOException;
@@ -18,6 +36,7 @@ import se.uu.ub.cora.idplogin.initialize.IdpLoginInstanceProvider;
 public class IdpLoginServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
+	private static final int AFTERHTTP = 10;
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -42,9 +61,9 @@ public class IdpLoginServlet extends HttpServlet {
 
 	private String getBaseURLFromRequest(HttpServletRequest request) {
 		String tempUrl = request.getRequestURL().toString();
-		String pathInfo = request.getServletPath();
-		String baseURL = tempUrl.substring(0, tempUrl.lastIndexOf(pathInfo));
-		baseURL += "/rest/logout/";
+		String baseURL = tempUrl.substring(0, tempUrl.indexOf('/', AFTERHTTP));
+		baseURL += IdpLoginInstanceProvider.getInitInfo().get("publicPathToSystem");
+		baseURL += "logout/";
 		return baseURL;
 	}
 
@@ -92,6 +111,8 @@ public class IdpLoginServlet extends HttpServlet {
 		out.println("}");
 		out.println("}");
 		out.println("};");
+		// out.println("window.opener.postMessage(authInfo,
+		// window.windowOpenedFromUrl);");
 		out.println("console.log(window.windowOpenedFromUrl);");
 		out.println("window.opener.postMessage(authInfo, \"*\");");
 

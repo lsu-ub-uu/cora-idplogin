@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Uppsala University Library
+ * Copyright 2017, 2018 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -42,12 +42,14 @@ public class IdpLoginInitializer implements ServletContextListener {
 		try {
 			tryToInitialize();
 		} catch (Exception e) {
-			throw new RuntimeException("Error starting IdpLogin: " + e);
+			throw new RuntimeException("Error starting IdpLogin: " + e.getMessage());
 		}
 	}
 
 	private void tryToInitialize() {
 		collectInitInformation();
+		ensurePublicPathToSystemExistsInInitInfo();
+		IdpLoginInstanceProvider.setInitInfo(initInfo);
 		createAndSetGatekeeperTokenProvider();
 	}
 
@@ -60,11 +62,10 @@ public class IdpLoginInitializer implements ServletContextListener {
 		}
 	}
 
-	private String getInitParameter(String parameterName) {
-		if (initInfo.containsKey(parameterName)) {
-			return initInfo.get(parameterName);
+	private void ensurePublicPathToSystemExistsInInitInfo() {
+		if (!initInfo.containsKey("publicPathToSystem")) {
+			throw new RuntimeException("Context must have a publicPathToSystem set.");
 		}
-		throw new RuntimeException("Context must have a " + parameterName + " set.");
 	}
 
 	private void createAndSetGatekeeperTokenProvider() {
@@ -72,6 +73,13 @@ public class IdpLoginInitializer implements ServletContextListener {
 		HttpHandlerFactory httpHandlerFactory = new HttpHandlerFactoryImp();
 		IdpLoginInstanceProvider.setGatekeeperTokenProvider(GatekeeperTokenProviderImp
 				.usingBaseUrlAndHttpHandlerFactory(baseUrl, httpHandlerFactory));
+	}
+
+	private String getInitParameter(String parameterName) {
+		if (initInfo.containsKey(parameterName)) {
+			return initInfo.get(parameterName);
+		}
+		throw new RuntimeException("Context must have a " + parameterName + " set.");
 	}
 
 	@Override

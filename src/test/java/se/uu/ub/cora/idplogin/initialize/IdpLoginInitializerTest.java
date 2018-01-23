@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Uppsala University Library
+ * Copyright 2017, 2018 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -19,6 +19,7 @@
 
 package se.uu.ub.cora.idplogin.initialize;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import javax.servlet.ServletContext;
@@ -42,15 +43,34 @@ public class IdpLoginInitializerTest {
 
 	@Test
 	public void testGatekeeperTokenProviderIsSet() {
-		source.setInitParameter("appTokenStorageClassName",
-				"se.uu.ub.cora.idplogin.AppTokenStorageSpy");
-		source.setInitParameter("gatekeeperURL", "http://localhost:8080/gatekeeper/");
-		idpLoginInitializer.contextInitialized(context);
+		setNeededInitParameters();
 		assertNotNull(IdpLoginInstanceProvider.getGatekeeperTokenProvider());
 	}
 
-	@Test(expectedExceptions = RuntimeException.class)
+	private void setNeededInitParameters() {
+		source.setInitParameter("gatekeeperURL", "http://localhost:8080/gatekeeper/");
+		source.setInitParameter("publicPathToSystem", "/systemone/idplogin/rest/");
+		idpLoginInitializer.contextInitialized(context);
+	}
+
+	@Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "Error "
+			+ "starting IdpLogin: Context must have a gatekeeperURL set.")
 	public void testInitializeSystemWithoutGatekeeperURL() {
+		source.setInitParameter("publicPathToSystem", "/systemone/idplogin/rest/");
+		idpLoginInitializer.contextInitialized(context);
+	}
+
+	@Test
+	public void testInitInfoSetInIdpLoginInstanceProvider() throws Exception {
+		setNeededInitParameters();
+		assertEquals(IdpLoginInstanceProvider.getInitInfo().get("publicPathToSystem"),
+				"/systemone/idplogin/rest/");
+	}
+
+	@Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "Error "
+			+ "starting IdpLogin: Context must have a publicPathToSystem set.")
+	public void testInitializeSystemWithoutPublicPathToSystem() {
+		source.setInitParameter("gatekeeperURL", "http://localhost:8080/gatekeeper/");
 		idpLoginInitializer.contextInitialized(context);
 	}
 

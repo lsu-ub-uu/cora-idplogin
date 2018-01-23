@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Uppsala University Library
+ * Copyright 2017, 2018 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -22,6 +22,9 @@ package se.uu.ub.cora.idplogin;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.http.HttpServlet;
 
 import org.testng.annotations.BeforeMethod;
@@ -39,10 +42,13 @@ public class IdpLoginServletTest {
 	private String authToken;
 	private String validForNoSeconds;
 	private String idInUserStorage;
+	private Map<String, String> initInfo = new HashMap<>();
 
 	@BeforeMethod
 	public void setup() {
 		gatekeeperTokenProvider = new GatekeeperTokenProviderSpy();
+		initInfo.put("publicPathToSystem", "/idplogin/rest/");
+		IdpLoginInstanceProvider.setInitInfo(initInfo);
 		IdpLoginInstanceProvider.setGatekeeperTokenProvider(gatekeeperTokenProvider);
 		loginServlet = new IdpLoginServlet();
 		requestSpy = new RequestSpy();
@@ -150,6 +156,8 @@ public class IdpLoginServletTest {
 		sb.append("\n");
 		sb.append("};");
 		sb.append("\n");
+		// sb.append("window.opener.postMessage(authInfo,
+		// window.windowOpenedFromUrl);");
 		sb.append("console.log(window.windowOpenedFromUrl);");
 		sb.append("\n");
 		sb.append("window.opener.postMessage(authInfo, \"*\");");
