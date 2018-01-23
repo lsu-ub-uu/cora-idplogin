@@ -92,7 +92,7 @@ public class IdpLoginServlet extends HttpServlet {
 		out.println("}");
 		out.println("}");
 		out.println("};");
-		out.println("window.opener.postMessage(authInfo, window.windowOpenedFromUrl);");
+		out.println("window.opener.postMessage(authInfo, \"*\");");
 
 		out.println("window.opener.focus();");
 		out.println("window.close();");
