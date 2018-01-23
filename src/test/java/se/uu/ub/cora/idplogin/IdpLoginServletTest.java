@@ -141,8 +141,8 @@ public class IdpLoginServletTest {
 		sb.append("\n");
 		sb.append("\"rel\" : \"delete\",");
 		sb.append("\n");
-		sb.append("\"url\" : \"https:\\/\\/epc.ub.uu.se\\/idplogin\\/rest\\/logout\\/" + idInUserStorage
-				+ "\"");
+		sb.append("\"url\" : \"https:\\/\\/epc.ub.uu.se\\/idplogin\\/rest\\/logout\\/"
+				+ idInUserStorage + "\"");
 		sb.append("\n");
 		sb.append("}");
 		sb.append("\n");
@@ -150,9 +150,7 @@ public class IdpLoginServletTest {
 		sb.append("\n");
 		sb.append("};");
 		sb.append("\n");
-		sb.append("window.opener.jsClient.getDependencies().globalInstances.loginManager");
-		sb.append("\n");
-		sb.append(".appTokenAuthInfoCallback(authInfo);");
+		sb.append("window.opener.postMessage(authInfo, window.windowOpenedFromUrl);");
 		sb.append("\n");
 		sb.append("window.opener.focus();");
 		sb.append("\n");

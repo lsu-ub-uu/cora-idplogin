@@ -61,8 +61,8 @@ public class IdpLoginServlet extends HttpServlet {
 		return null != forwardedProtocol && !"".equals(forwardedProtocol);
 	}
 
-	private void createAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrl(HttpServletResponse response,
-			AuthToken authToken, String url) throws IOException {
+	private void createAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrl(
+			HttpServletResponse response, AuthToken authToken, String url) throws IOException {
 		PrintWriter out = response.getWriter();
 		out.println("<!DOCTYPE html>");
 		out.println("<html><head>");
@@ -92,8 +92,8 @@ public class IdpLoginServlet extends HttpServlet {
 		out.println("}");
 		out.println("}");
 		out.println("};");
-		out.println("window.opener.jsClient.getDependencies().globalInstances.loginManager");
-		out.println(".appTokenAuthInfoCallback(authInfo);");
+		out.println("window.opener.postMessage(authInfo, window.windowOpenedFromUrl);");
+
 		out.println("window.opener.focus();");
 		out.println("window.close();");
 		out.println("}");
