@@ -150,6 +150,8 @@ public class IdpLoginServletTest {
 		sb.append("\n");
 		sb.append("};");
 		sb.append("\n");
+		sb.append("console.log(window.windowOpenedFromUrl);");
+		sb.append("\n");
 		sb.append("window.opener.postMessage(authInfo, \"*\");");
 		sb.append("\n");
 		sb.append("window.opener.focus();");
