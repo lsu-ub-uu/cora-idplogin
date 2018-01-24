@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright 2017 Uppsala University Library
+  ~ Copyright 2017, 2018 Uppsala University Library
   ~
   ~ This file is part of Cora.
   ~
@@ -36,10 +36,6 @@
   <servlet>
     <servlet-name>idplogin</servlet-name>
     <servlet-class>se.uu.ub.cora.idplogin.IdpLoginServlet</servlet-class>
-<!--     <init-param> -->
-<!--       <param-name>jersey.config.server.provider.packages</param-name> -->
-<!--       <param-value>se.uu.ub.cora.idplogin</param-value> -->
-<!--     </init-param> -->
     <load-on-startup>1</load-on-startup>
   </servlet>
   <servlet-mapping>
@@ -61,7 +57,7 @@
     <init-param>
       <param-name>cors.allowed.headers</param-name>
       <param-value>authToken,Content-Type,X-Requested-With,accept,Origin,
-			Access-Control-Request-Method,Access-Control-Request-Headers
+			Access-Control-Request-Method,Access-Control-Request-Headers, Access-Control-Allow-Origin
 			</param-value>
     </init-param>
   </filter>

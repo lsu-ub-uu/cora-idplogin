@@ -69,10 +69,10 @@ public class IdpLoginInitializer implements ServletContextListener {
 	}
 
 	private void createAndSetGatekeeperTokenProvider() {
-		String baseUrl = getInitParameter("gatekeeperURL");
+		String gatekeeperUrl = getInitParameter("gatekeeperURL");
 		HttpHandlerFactory httpHandlerFactory = new HttpHandlerFactoryImp();
 		IdpLoginInstanceProvider.setGatekeeperTokenProvider(GatekeeperTokenProviderImp
-				.usingBaseUrlAndHttpHandlerFactory(baseUrl, httpHandlerFactory));
+				.usingBaseUrlAndHttpHandlerFactory(gatekeeperUrl, httpHandlerFactory));
 	}
 
 	private String getInitParameter(String parameterName) {
