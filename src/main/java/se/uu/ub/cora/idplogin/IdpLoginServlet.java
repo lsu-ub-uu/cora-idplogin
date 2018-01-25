@@ -62,7 +62,7 @@ public class IdpLoginServlet extends HttpServlet {
 	private String getBaseURLFromRequest(HttpServletRequest request) {
 		String tempUrl = request.getRequestURL().toString();
 		String baseURL = tempUrl.substring(0, tempUrl.indexOf('/', AFTERHTTP));
-		baseURL += IdpLoginInstanceProvider.getInitInfo().get("publicPathToSystem");
+		baseURL += IdpLoginInstanceProvider.getInitInfo().get("idpLoginPublicPathToSystem");
 		baseURL += "logout/";
 		return baseURL;
 	}
@@ -111,6 +111,8 @@ public class IdpLoginServlet extends HttpServlet {
 		out.println("}");
 		out.println("}");
 		out.println("};");
+		// out.println("window.opener.postMessage(authInfo,
+		// window.windowOpenedFromUrl);");
 		out.println("console.log(window.windowOpenedFromUrl);");
 		out.println("window.opener.postMessage(authInfo, \"*\");");
 

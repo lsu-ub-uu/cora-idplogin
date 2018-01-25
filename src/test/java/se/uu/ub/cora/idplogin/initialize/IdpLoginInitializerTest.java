@@ -49,27 +49,27 @@ public class IdpLoginInitializerTest {
 
 	private void setNeededInitParameters() {
 		source.setInitParameter("gatekeeperURL", "http://localhost:8080/gatekeeper/");
-		source.setInitParameter("publicPathToSystem", "/systemone/idplogin/rest/");
+		source.setInitParameter("idpLoginPublicPathToSystem", "/systemone/idplogin/rest/");
 		idpLoginInitializer.contextInitialized(context);
 	}
 
 	@Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "Error "
 			+ "starting IdpLogin: Context must have a gatekeeperURL set.")
 	public void testInitializeSystemWithoutGatekeeperURL() {
-		source.setInitParameter("publicPathToSystem", "/systemone/idplogin/rest/");
+		source.setInitParameter("idpLoginPublicPathToSystem", "/systemone/idplogin/rest/");
 		idpLoginInitializer.contextInitialized(context);
 	}
 
 	@Test
 	public void testInitInfoSetInIdpLoginInstanceProvider() throws Exception {
 		setNeededInitParameters();
-		assertEquals(IdpLoginInstanceProvider.getInitInfo().get("publicPathToSystem"),
+		assertEquals(IdpLoginInstanceProvider.getInitInfo().get("idpLoginPublicPathToSystem"),
 				"/systemone/idplogin/rest/");
 	}
 
 	@Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "Error "
-			+ "starting IdpLogin: Context must have a publicPathToSystem set.")
-	public void testInitializeSystemWithoutPublicPathToSystem() {
+			+ "starting IdpLogin: Context must have a idpLoginPublicPathToSystem set.")
+	public void testInitializeSystemWithoutidpLoginPublicPathToSystem() {
 		source.setInitParameter("gatekeeperURL", "http://localhost:8080/gatekeeper/");
 		idpLoginInitializer.contextInitialized(context);
 	}

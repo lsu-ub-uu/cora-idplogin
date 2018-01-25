@@ -47,7 +47,7 @@ public class IdpLoginServletTest {
 	@BeforeMethod
 	public void setup() {
 		gatekeeperTokenProvider = new GatekeeperTokenProviderSpy();
-		initInfo.put("publicPathToSystem", "/idplogin/rest/");
+		initInfo.put("idpLoginPublicPathToSystem", "/idplogin/rest/");
 		IdpLoginInstanceProvider.setInitInfo(initInfo);
 		IdpLoginInstanceProvider.setGatekeeperTokenProvider(gatekeeperTokenProvider);
 		loginServlet = new IdpLoginServlet();
@@ -156,6 +156,8 @@ public class IdpLoginServletTest {
 		sb.append("\n");
 		sb.append("};");
 		sb.append("\n");
+		// sb.append("window.opener.postMessage(authInfo,
+		// window.windowOpenedFromUrl);");
 		sb.append("console.log(window.windowOpenedFromUrl);");
 		sb.append("\n");
 		sb.append("window.opener.postMessage(authInfo, \"*\");");
