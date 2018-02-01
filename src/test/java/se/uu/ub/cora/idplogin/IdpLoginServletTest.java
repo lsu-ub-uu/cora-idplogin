@@ -131,7 +131,7 @@ public class IdpLoginServletTest {
 		sb.append("\n");
 		sb.append("var authInfo = {");
 		sb.append("\n");
-		sb.append("\"userId\" : \"Webredirect fake login\",");
+		sb.append("\"userId\" : \"someIdFromLogin\",");
 		sb.append("\n");
 		sb.append("\"token\" : \"" + authToken + "\",");
 		sb.append("\n");
@@ -155,8 +155,6 @@ public class IdpLoginServletTest {
 		sb.append("}");
 		sb.append("\n");
 		sb.append("};");
-		sb.append("\n");
-		sb.append("alert(authInfo);");
 		sb.append("\n");
 		sb.append("window.opener.postMessage(authInfo, \"http:\\/\\/localhost:8080\");");
 		sb.append("\n");

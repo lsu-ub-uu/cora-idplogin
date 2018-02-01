@@ -61,7 +61,7 @@ public class IdpLoginServlet extends HttpServlet {
 		out.println("window.onload = start;");
 		out.println("function start() {");
 		out.println("var authInfo = {");
-		out.println("\"userId\" : \"Webredirect fake login\",");
+		out.println("\"userId\" : \"" + authToken.idFromLogin + "\",");
 		out.print("\"token\" : \"");
 		out.print(Encode.forJavaScript(authToken.token));
 		out.println("\",");
@@ -80,7 +80,6 @@ public class IdpLoginServlet extends HttpServlet {
 		out.println("}");
 		out.println("}");
 		out.println("};");
-		out.println("alert(authInfo);");
 		out.println(
 				"window.opener.postMessage(authInfo, \""
 						+ Encode.forJavaScript(
