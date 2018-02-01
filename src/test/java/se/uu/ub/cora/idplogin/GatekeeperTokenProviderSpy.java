@@ -29,17 +29,18 @@ import se.uu.ub.cora.gatekeepertokenprovider.UserInfo;
 public class GatekeeperTokenProviderSpy implements GatekeeperTokenProvider {
 
 	public List<UserInfo> userInfos = new ArrayList<>();
+	public List<String> deletedUserInfos = new ArrayList<>();
 
 	@Override
 	public AuthToken getAuthTokenForUserInfo(UserInfo userInfo) {
 		userInfos.add(userInfo);
-		return AuthToken.withIdAndValidForNoSecondsAndIdInUserStorageAndIdFromLogin("someAuth'Token",
-				278, "someIdInUser'Storage", "someIdFromLogin");
+		return AuthToken.withIdAndValidForNoSecondsAndIdInUserStorageAndIdFromLogin(
+				"someAuth'Token", 278, "someIdInUser'Storage", "someIdFromLogin");
 	}
 
 	@Override
 	public void removeAuthTokenForUser(String idInUserStorage, String authToken) {
-		// TODO Auto-generated method stub
+		deletedUserInfos.add(idInUserStorage);
 
 	}
 

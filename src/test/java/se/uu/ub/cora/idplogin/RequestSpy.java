@@ -27,6 +27,7 @@ import javax.servlet.http.Part;
 public class RequestSpy implements HttpServletRequest {
 
 	public Map<String, String> headers = new HashMap<>();
+	public String pathInfo = "idplogin";
 
 	@Override
 	public AsyncContext getAsyncContext() {
@@ -319,7 +320,7 @@ public class RequestSpy implements HttpServletRequest {
 
 	@Override
 	public String getPathInfo() {
-		return "idplogin";
+		return pathInfo;
 	}
 
 	@Override

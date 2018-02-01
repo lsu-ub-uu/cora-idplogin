@@ -36,7 +36,6 @@ import se.uu.ub.cora.idplogin.initialize.IdpLoginInstanceProvider;
 public class IdpLoginServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
-	private static final int AFTERHTTP = 10;
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -45,39 +44,10 @@ public class IdpLoginServlet extends HttpServlet {
 		UserInfo userInfo = UserInfo.withLoginId(userIdFromIdp);
 		AuthToken authTokenFromGatekeeper = getNewAuthTokenFromGatekeeper(userInfo);
 
-		String url = getBaseURLWithCorrectProtocolFromRequest(request);
+		String url = IdpLoginInstanceProvider.getInitInfo().get("tokenLogoutURL");
 
 		createAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrl(response, authTokenFromGatekeeper,
 				url);
-	}
-
-	private String getBaseURLWithCorrectProtocolFromRequest(HttpServletRequest request) {
-		String baseURL = getBaseURLFromRequest(request);
-
-		baseURL = changeHttpToHttpsIfHeaderSaysSo(request, baseURL);
-
-		return baseURL;
-	}
-
-	private String getBaseURLFromRequest(HttpServletRequest request) {
-		String tempUrl = request.getRequestURL().toString();
-		String baseURL = tempUrl.substring(0, tempUrl.indexOf('/', AFTERHTTP));
-		baseURL += IdpLoginInstanceProvider.getInitInfo().get("idpLoginPublicPathToSystem");
-		baseURL += "logout/";
-		return baseURL;
-	}
-
-	private String changeHttpToHttpsIfHeaderSaysSo(HttpServletRequest request, String baseURI) {
-		String forwardedProtocol = request.getHeader("X-Forwarded-Proto");
-
-		if (ifForwardedProtocolExists(forwardedProtocol)) {
-			return baseURI.replaceAll("http:", forwardedProtocol + ":");
-		}
-		return baseURI;
-	}
-
-	private boolean ifForwardedProtocolExists(String forwardedProtocol) {
-		return null != forwardedProtocol && !"".equals(forwardedProtocol);
 	}
 
 	private void createAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrl(
@@ -105,16 +75,17 @@ public class IdpLoginServlet extends HttpServlet {
 		out.println("\"delete\" : {");
 		out.println("\"requestMethod\" : \"DELETE\",");
 		out.println("\"rel\" : \"delete\",");
-		out.print("\"url\" : \"" + Encode.forJavaScript(url));
-		out.print(Encode.forJavaScript(authToken.idInUserStorage));
+		out.print("\"url\" : \"" + Encode.forJavaScript(url + authToken.idInUserStorage));
 		out.println("\"");
 		out.println("}");
 		out.println("}");
 		out.println("};");
-		// out.println("window.opener.postMessage(authInfo,
-		// window.windowOpenedFromUrl);");
 		out.println("console.log(window.windowOpenedFromUrl);");
-		out.println("window.opener.postMessage(authInfo, \"*\");");
+		out.println(
+				"window.opener.postMessage(authInfo, \""
+						+ Encode.forJavaScript(
+								IdpLoginInstanceProvider.getInitInfo().get("mainSystemDomain"))
+						+ "\");");
 
 		out.println("window.opener.focus();");
 		out.println("window.close();");

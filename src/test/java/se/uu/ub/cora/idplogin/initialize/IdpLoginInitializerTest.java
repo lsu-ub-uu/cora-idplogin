@@ -49,27 +49,42 @@ public class IdpLoginInitializerTest {
 
 	private void setNeededInitParameters() {
 		source.setInitParameter("gatekeeperURL", "http://localhost:8080/gatekeeper/");
-		source.setInitParameter("idpLoginPublicPathToSystem", "/systemone/idplogin/rest/");
+		source.setInitParameter("mainSystemDomain", "http://localhost:8080");
+		source.setInitParameter("tokenLogoutURL",
+				"http://localhost:8080/apptokenverifier/rest/apptoken/");
 		idpLoginInitializer.contextInitialized(context);
 	}
 
 	@Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "Error "
 			+ "starting IdpLogin: Context must have a gatekeeperURL set.")
 	public void testInitializeSystemWithoutGatekeeperURL() {
-		source.setInitParameter("idpLoginPublicPathToSystem", "/systemone/idplogin/rest/");
+		source.setInitParameter("tokenLogoutURL",
+				"http://localhost:8080/apptokenverifier/rest/apptoken/");
+		source.setInitParameter("mainSystemDomain", "http://localhost:8080");
+
 		idpLoginInitializer.contextInitialized(context);
 	}
 
 	@Test
 	public void testInitInfoSetInIdpLoginInstanceProvider() throws Exception {
 		setNeededInitParameters();
-		assertEquals(IdpLoginInstanceProvider.getInitInfo().get("idpLoginPublicPathToSystem"),
-				"/systemone/idplogin/rest/");
+		assertEquals(IdpLoginInstanceProvider.getInitInfo().get("mainSystemDomain"),
+				"http://localhost:8080");
 	}
 
 	@Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "Error "
-			+ "starting IdpLogin: Context must have a idpLoginPublicPathToSystem set.")
-	public void testInitializeSystemWithoutidpLoginPublicPathToSystem() {
+			+ "starting IdpLogin: Context must have a mainSystemDomain set.")
+	public void testInitializeSystemWithoutMainSystemDomain() {
+		source.setInitParameter("tokenLogoutURL",
+				"http://localhost:8080/apptokenverifier/rest/apptoken/");
+		source.setInitParameter("gatekeeperURL", "http://localhost:8080/gatekeeper/");
+		idpLoginInitializer.contextInitialized(context);
+	}
+
+	@Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "Error "
+			+ "starting IdpLogin: Context must have a tokenLogoutURL set.")
+	public void testInitializeSystemWithoutTokenLogoutURL() {
+		source.setInitParameter("mainSystemDomain", "http://localhost:8080");
 		source.setInitParameter("gatekeeperURL", "http://localhost:8080/gatekeeper/");
 		idpLoginInitializer.contextInitialized(context);
 	}

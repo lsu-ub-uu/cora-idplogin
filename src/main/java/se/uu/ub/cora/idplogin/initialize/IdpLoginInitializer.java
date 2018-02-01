@@ -48,7 +48,8 @@ public class IdpLoginInitializer implements ServletContextListener {
 
 	private void tryToInitialize() {
 		collectInitInformation();
-		ensureidpLoginPublicPathToSystemExistsInInitInfo();
+		ensureParameterExistsInInitInfo("mainSystemDomain");
+		ensureParameterExistsInInitInfo("tokenLogoutURL");
 		IdpLoginInstanceProvider.setInitInfo(initInfo);
 		createAndSetGatekeeperTokenProvider();
 	}
@@ -62,9 +63,9 @@ public class IdpLoginInitializer implements ServletContextListener {
 		}
 	}
 
-	private void ensureidpLoginPublicPathToSystemExistsInInitInfo() {
-		if (!initInfo.containsKey("idpLoginPublicPathToSystem")) {
-			throw new RuntimeException("Context must have a idpLoginPublicPathToSystem set.");
+	private void ensureParameterExistsInInitInfo(String parameterName) {
+		if (!initInfo.containsKey(parameterName)) {
+			throw new RuntimeException("Context must have a " + parameterName + " set.");
 		}
 	}
 
@@ -76,10 +77,8 @@ public class IdpLoginInitializer implements ServletContextListener {
 	}
 
 	private String getInitParameter(String parameterName) {
-		if (initInfo.containsKey(parameterName)) {
-			return initInfo.get(parameterName);
-		}
-		throw new RuntimeException("Context must have a " + parameterName + " set.");
+		ensureParameterExistsInInitInfo(parameterName);
+		return initInfo.get(parameterName);
 	}
 
 	@Override

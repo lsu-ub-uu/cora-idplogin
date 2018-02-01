@@ -47,7 +47,8 @@ public class IdpLoginServletTest {
 	@BeforeMethod
 	public void setup() {
 		gatekeeperTokenProvider = new GatekeeperTokenProviderSpy();
-		initInfo.put("idpLoginPublicPathToSystem", "/idplogin/rest/");
+		initInfo.put("mainSystemDomain", "http://localhost:8080");
+		initInfo.put("tokenLogoutURL", "http://localhost:8080/apptokenverifier/rest/apptoken/");
 		IdpLoginInstanceProvider.setInitInfo(initInfo);
 		IdpLoginInstanceProvider.setGatekeeperTokenProvider(gatekeeperTokenProvider);
 		loginServlet = new IdpLoginServlet();
@@ -72,7 +73,6 @@ public class IdpLoginServletTest {
 
 		UserInfo userInfo = gatekeeperTokenProvider.userInfos.get(0);
 		assertEquals(userInfo.idFromLogin, "test@testing.org");
-		// assertEquals(userInfo.idInUserStorage, "141414");
 	}
 
 	@Test
@@ -147,7 +147,7 @@ public class IdpLoginServletTest {
 		sb.append("\n");
 		sb.append("\"rel\" : \"delete\",");
 		sb.append("\n");
-		sb.append("\"url\" : \"https:\\/\\/epc.ub.uu.se\\/idplogin\\/rest\\/logout\\/"
+		sb.append("\"url\" : \"http:\\/\\/localhost:8080\\/apptokenverifier\\/rest\\/apptoken\\/"
 				+ idInUserStorage + "\"");
 		sb.append("\n");
 		sb.append("}");
@@ -156,11 +156,9 @@ public class IdpLoginServletTest {
 		sb.append("\n");
 		sb.append("};");
 		sb.append("\n");
-		// sb.append("window.opener.postMessage(authInfo,
-		// window.windowOpenedFromUrl);");
 		sb.append("console.log(window.windowOpenedFromUrl);");
 		sb.append("\n");
-		sb.append("window.opener.postMessage(authInfo, \"*\");");
+		sb.append("window.opener.postMessage(authInfo, \"http:\\/\\/localhost:8080\");");
 		sb.append("\n");
 		sb.append("window.opener.focus();");
 		sb.append("\n");
