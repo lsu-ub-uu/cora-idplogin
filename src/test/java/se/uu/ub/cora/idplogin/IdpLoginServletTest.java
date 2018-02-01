@@ -156,7 +156,7 @@ public class IdpLoginServletTest {
 		sb.append("\n");
 		sb.append("};");
 		sb.append("\n");
-		sb.append("console.log(window.windowOpenedFromUrl);");
+		sb.append("alert(authInfo);");
 		sb.append("\n");
 		sb.append("window.opener.postMessage(authInfo, \"http:\\/\\/localhost:8080\");");
 		sb.append("\n");

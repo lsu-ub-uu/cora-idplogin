@@ -80,7 +80,7 @@ public class IdpLoginServlet extends HttpServlet {
 		out.println("}");
 		out.println("}");
 		out.println("};");
-		out.println("console.log(window.windowOpenedFromUrl);");
+		out.println("alert(authInfo);");
 		out.println(
 				"window.opener.postMessage(authInfo, \""
 						+ Encode.forJavaScript(
