@@ -61,7 +61,7 @@ public class IdpLoginServlet extends HttpServlet {
 		out.println("window.onload = start;");
 		out.println("function start() {");
 		out.println("var authInfo = {");
-		out.println("\"userId\" : \"" + authToken.idFromLogin + "\",");
+		out.println("\"userId\" : \"" + Encode.forJavaScript(authToken.idFromLogin) + "\",");
 		out.print("\"token\" : \"");
 		out.print(Encode.forJavaScript(authToken.token));
 		out.println("\",");
