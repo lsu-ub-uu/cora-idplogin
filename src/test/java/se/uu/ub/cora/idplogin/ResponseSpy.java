@@ -232,4 +232,10 @@ public class ResponseSpy implements HttpServletResponse {
 
 	}
 
+	@Override
+	public void setContentLengthLong(long len) {
+		// TODO Auto-generated method stub
+
+	}
+
 }
