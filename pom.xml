@@ -66,13 +66,13 @@
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
-			<version>3.0.1</version>
+			<version>4.0.1</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.owasp.encoder</groupId>
 			<artifactId>encoder</artifactId>
-			<version>1.2.1</version>
+			<version>1.2.2</version>
 		</dependency>
 		<!-- The JAXB APIs are considered to be Java EE APIs, and therefore are 
 			no longer contained on the default class path in Java SE 9. In Java 11 they 
