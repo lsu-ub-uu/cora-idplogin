@@ -26,7 +26,7 @@
 	<name>idplogin</name>
 
 	<properties>
-		<gatekeepertokenprovider.version>0.3-SNAPSHOT</gatekeepertokenprovider.version>
+		<gatekeepertokenprovider.version>0.4-SNAPSHOT</gatekeepertokenprovider.version>
 		<javax.ws.rs.version>2.1.1</javax.ws.rs.version>
 		<jersey.version>2.27</jersey.version>
 	</properties>
