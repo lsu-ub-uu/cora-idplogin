@@ -16,6 +16,8 @@ public class ResponseSpy implements HttpServletResponse {
 
 	private PrintWriter printWriter = new PrintWriterSpy(stream);
 
+	public boolean throwIOExceptionOnGetWriter = false;
+
 	@Override
 	public void flushBuffer() throws IOException {
 		// TODO Auto-generated method stub
@@ -54,7 +56,9 @@ public class ResponseSpy implements HttpServletResponse {
 
 	@Override
 	public PrintWriter getWriter() throws IOException {
-		// TODO Auto-generated method stub
+		if (throwIOExceptionOnGetWriter) {
+			throw new IOException("throwing error from ResponseSpy");
+		}
 		return printWriter;
 	}
 

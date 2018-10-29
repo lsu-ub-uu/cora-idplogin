@@ -32,6 +32,7 @@ import se.uu.ub.cora.gatekeepertokenprovider.AuthToken;
 import se.uu.ub.cora.gatekeepertokenprovider.GatekeeperTokenProvider;
 import se.uu.ub.cora.gatekeepertokenprovider.UserInfo;
 import se.uu.ub.cora.idplogin.initialize.IdpLoginInstanceProvider;
+import se.uu.ub.cora.idplogin.json.IdpLoginOnlySharingKnownInformationException;
 
 public class IdpLoginServlet extends HttpServlet {
 
@@ -46,13 +47,23 @@ public class IdpLoginServlet extends HttpServlet {
 
 		String url = IdpLoginInstanceProvider.getInitInfo().get("tokenLogoutURL");
 
-		createAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrl(response, authTokenFromGatekeeper,
-				url);
+		tryToCreateAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrlAndUserId(response,
+				authTokenFromGatekeeper, url, userIdFromIdp);
 	}
 
-	private void createAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrl(
-			HttpServletResponse response, AuthToken authToken, String url) throws IOException {
-		PrintWriter out = response.getWriter();
+	private void tryToCreateAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrlAndUserId(
+			HttpServletResponse response, AuthToken authTokenFromGatekeeper, String url,
+			String userIdFromIdp) {
+		try (PrintWriter out = response.getWriter();) {
+			createAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrl(authTokenFromGatekeeper, url,
+					out);
+		} catch (IOException e) {
+			throw IdpLoginOnlySharingKnownInformationException.forUserId(userIdFromIdp);
+		}
+	}
+
+	private void createAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrl(AuthToken authToken,
+			String url, PrintWriter out) {
 		out.println("<!DOCTYPE html>");
 		out.println("<html><head>");
 		out.println("<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>");
@@ -93,7 +104,6 @@ public class IdpLoginServlet extends HttpServlet {
 
 		out.println("<body>");
 		out.println("</body></html>");
-		out.close();
 	}
 
 	private AuthToken getNewAuthTokenFromGatekeeper(UserInfo userInfo) {

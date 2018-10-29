@@ -32,6 +32,7 @@ import org.testng.annotations.Test;
 
 import se.uu.ub.cora.gatekeepertokenprovider.UserInfo;
 import se.uu.ub.cora.idplogin.initialize.IdpLoginInstanceProvider;
+import se.uu.ub.cora.idplogin.json.IdpLoginOnlySharingKnownInformationException;
 
 public class IdpLoginServletTest {
 
@@ -174,4 +175,14 @@ public class IdpLoginServletTest {
 		return sb.toString();
 	}
 
+	@Test(expectedExceptions = IdpLoginOnlySharingKnownInformationException.class, expectedExceptionsMessageRegExp = ""
+			+ "test@testing.org")
+	public void testGetWhenError() throws Exception {
+		requestSpy.headers.put("eppn", "test@testing.org");
+		responseSpy.throwIOExceptionOnGetWriter = true;
+		loginServlet.doGet(requestSpy, responseSpy);
+
+		String expectedHtml = createExpectedHtml(authToken, validForNoSeconds, idInUserStorage);
+		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
+	}
 }
