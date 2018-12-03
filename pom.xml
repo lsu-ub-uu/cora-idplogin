@@ -16,17 +16,17 @@
 	<parent>
 		<groupId>se.uu.ub.cora</groupId>
 		<artifactId>cora-parent</artifactId>
-		<version>0.7-SNAPSHOT</version>
+		<version>0.8-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>idplogin</artifactId>
-	<version>0.2-SNAPSHOT</version>
+	<version>0.3-SNAPSHOT</version>
 	<packaging>war</packaging>
 
 	<name>idplogin</name>
 
 	<properties>
-		<gatekeepertokenprovider.version>0.4-SNAPSHOT</gatekeepertokenprovider.version>
+		<gatekeepertokenprovider.version>0.5-SNAPSHOT</gatekeepertokenprovider.version>
 		<javax.ws.rs.version>2.1.1</javax.ws.rs.version>
 		<jersey.version>2.27</jersey.version>
 	</properties>
