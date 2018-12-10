@@ -18,7 +18,7 @@
 	</parent>
 
 	<artifactId>idplogin</artifactId>
-	<version>0.3.0</version>
+	<version>0.3.1-SNAPSHOT</version>
 	<packaging>war</packaging>
 
 	<name>idplogin</name>
@@ -33,7 +33,7 @@
 		<connection>scm:git:https://github.com/lsu-ub-uu/cora-idplogin.git</connection>
 		<developerConnection>scm:git:https://github.com/lsu-ub-uu/cora-idplogin.git</developerConnection>
 		<url>https://github.com/lsu-ub-uu/cora-idplogin.git</url>
-	  <tag>idplogin-0.3.0</tag>
+	  <tag>HEAD</tag>
   </scm>
 
 
