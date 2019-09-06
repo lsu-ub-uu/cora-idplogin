@@ -28,13 +28,20 @@ import javax.servlet.ServletContextEvent;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import se.uu.ub.cora.idplogin.log.LoggerFactorySpy;
+import se.uu.ub.cora.logger.LoggerProvider;
+
 public class IdpLoginInitializerTest {
 	private IdpLoginInitializer idpLoginInitializer;
 	private ServletContext source;
 	private ServletContextEvent context;
+	private LoggerFactorySpy loggerFactorySpy;
+	private String testedClassName = "IdpLoginInitializer";
 
 	@BeforeMethod
 	public void setUp() {
+		loggerFactorySpy = new LoggerFactorySpy();
+		LoggerProvider.setLoggerFactory(loggerFactorySpy);
 		idpLoginInitializer = new IdpLoginInitializer();
 		source = new ServletContextSpy();
 		context = new ServletContextEvent(source);
@@ -56,13 +63,27 @@ public class IdpLoginInitializerTest {
 	}
 
 	@Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "Error "
-			+ "starting IdpLogin: Context must have a gatekeeperURL set.")
+			+ "starting IdpLogin: InitInfo must contain gatekeeperURL")
 	public void testInitializeSystemWithoutGatekeeperURL() {
 		source.setInitParameter("tokenLogoutURL",
 				"http://localhost:8080/apptokenverifier/rest/apptoken/");
 		source.setInitParameter("mainSystemDomain", "http://localhost:8080");
 
 		idpLoginInitializer.contextInitialized(context);
+	}
+
+	@Test
+	public void testErrorIsLoggedIfMissingGatekeeperURL() throws Exception {
+		source.setInitParameter("tokenLogoutURL",
+				"http://localhost:8080/apptokenverifier/rest/apptoken/");
+		source.setInitParameter("mainSystemDomain", "http://localhost:8080");
+		try {
+			idpLoginInitializer.contextInitialized(context);
+		} catch (Exception e) {
+
+		}
+		assertEquals(loggerFactorySpy.getFatalLogMessageUsingClassNameAndNo(testedClassName, 0),
+				"InitInfo must contain gatekeeperURL");
 	}
 
 	@Test
@@ -73,7 +94,7 @@ public class IdpLoginInitializerTest {
 	}
 
 	@Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "Error "
-			+ "starting IdpLogin: Context must have a mainSystemDomain set.")
+			+ "starting IdpLogin: InitInfo must contain mainSystemDomain")
 	public void testInitializeSystemWithoutMainSystemDomain() {
 		source.setInitParameter("tokenLogoutURL",
 				"http://localhost:8080/apptokenverifier/rest/apptoken/");
@@ -81,8 +102,22 @@ public class IdpLoginInitializerTest {
 		idpLoginInitializer.contextInitialized(context);
 	}
 
+	@Test
+	public void testErrorIsLoggedIfMissingMainSystemDomain() throws Exception {
+		source.setInitParameter("tokenLogoutURL",
+				"http://localhost:8080/apptokenverifier/rest/apptoken/");
+		source.setInitParameter("gatekeeperURL", "http://localhost:8080/gatekeeper/");
+		try {
+			idpLoginInitializer.contextInitialized(context);
+		} catch (Exception e) {
+
+		}
+		assertEquals(loggerFactorySpy.getFatalLogMessageUsingClassNameAndNo(testedClassName, 0),
+				"InitInfo must contain mainSystemDomain");
+	}
+
 	@Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = "Error "
-			+ "starting IdpLogin: Context must have a tokenLogoutURL set.")
+			+ "starting IdpLogin: InitInfo must contain tokenLogoutURL")
 	public void testInitializeSystemWithoutTokenLogoutURL() {
 		source.setInitParameter("mainSystemDomain", "http://localhost:8080");
 		source.setInitParameter("gatekeeperURL", "http://localhost:8080/gatekeeper/");
@@ -90,9 +125,37 @@ public class IdpLoginInitializerTest {
 	}
 
 	@Test
+	public void testErrorIsLoggedIfMissingTokenLogoutURL() throws Exception {
+		source.setInitParameter("mainSystemDomain", "http://localhost:8080");
+		source.setInitParameter("gatekeeperURL", "http://localhost:8080/gatekeeper/");
+		try {
+			idpLoginInitializer.contextInitialized(context);
+		} catch (Exception e) {
+
+		}
+		assertEquals(loggerFactorySpy.getFatalLogMessageUsingClassNameAndNo(testedClassName, 0),
+				"InitInfo must contain tokenLogoutURL");
+	}
+
+	@Test
 	public void testDestroySystem() {
 		IdpLoginInitializer ApptokenInitializer = new IdpLoginInitializer();
 		ApptokenInitializer.contextDestroyed(null);
 		// TODO: should we do something on destroy?
+	}
+
+	@Test
+	public void testLogMessagesOnStartUp() throws Exception {
+		setNeededInitParameters();
+		assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 0),
+				"IdpLoginInitializer starting...");
+		assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 1),
+				"Found http://localhost:8080 as mainSystemDomain");
+		assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 2),
+				"Found http://localhost:8080/apptokenverifier/rest/apptoken/ as tokenLogoutURL");
+		assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 3),
+				"Found http://localhost:8080/gatekeeper/ as gatekeeperURL");
+		assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 4),
+				"IdpLoginInitializer started");
 	}
 }

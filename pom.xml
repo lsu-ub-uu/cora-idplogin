@@ -24,7 +24,8 @@
 	<name>idplogin</name>
 
 	<properties>
-		<gatekeepertokenprovider.version>1.0.0</gatekeepertokenprovider.version>
+		<logger.version>1.0.0</logger.version>
+		<gatekeepertokenprovider.version>1.1.0</gatekeepertokenprovider.version>
 		<javax.ws.rs.version>2.1.1</javax.ws.rs.version>
 		<jersey.version>2.27</jersey.version>
 	</properties>
@@ -43,6 +44,12 @@
 			<artifactId>gatekeepertokenprovider</artifactId>
 			<version>${gatekeepertokenprovider.version}</version>
 			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>logger</artifactId>
+			<version>${logger.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.testng</groupId>

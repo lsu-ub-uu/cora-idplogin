@@ -30,11 +30,14 @@ import javax.servlet.annotation.WebListener;
 import se.uu.ub.cora.gatekeepertokenprovider.GatekeeperTokenProviderImp;
 import se.uu.ub.cora.httphandler.HttpHandlerFactory;
 import se.uu.ub.cora.httphandler.HttpHandlerFactoryImp;
+import se.uu.ub.cora.logger.Logger;
+import se.uu.ub.cora.logger.LoggerProvider;
 
 @WebListener
 public class IdpLoginInitializer implements ServletContextListener {
 	private ServletContext servletContext;
 	private HashMap<String, String> initInfo;
+	private Logger log = LoggerProvider.getLoggerForClass(IdpLoginInitializer.class);
 
 	@Override
 	public void contextInitialized(ServletContextEvent arg0) {
@@ -47,11 +50,14 @@ public class IdpLoginInitializer implements ServletContextListener {
 	}
 
 	private void tryToInitialize() {
+		String simpleName = IdpLoginInitializer.class.getSimpleName();
+		log.logInfoUsingMessage(simpleName + " starting...");
 		collectInitInformation();
-		ensureParameterExistsInInitInfo("mainSystemDomain");
-		ensureParameterExistsInInitInfo("tokenLogoutURL");
+		ensureParametersExistInInitInfo();
 		IdpLoginInstanceProvider.setInitInfo(initInfo);
 		createAndSetGatekeeperTokenProvider();
+		log.logInfoUsingMessage(simpleName + " started");
+
 	}
 
 	private void collectInitInformation() {
@@ -63,22 +69,32 @@ public class IdpLoginInitializer implements ServletContextListener {
 		}
 	}
 
-	private void ensureParameterExistsInInitInfo(String parameterName) {
+	private void ensureParametersExistInInitInfo() {
+		tryToGetInitParameter("mainSystemDomain");
+		tryToGetInitParameter("tokenLogoutURL");
+		tryToGetInitParameter("gatekeeperURL");
+	}
+
+	private String tryToGetInitParameter(String parameterName) {
+		throwErrorIfKeyIsMissingFromInitInfo(parameterName);
+		String parameter = initInfo.get(parameterName);
+		log.logInfoUsingMessage("Found " + parameter + " as " + parameterName);
+		return parameter;
+	}
+
+	private void throwErrorIfKeyIsMissingFromInitInfo(String parameterName) {
 		if (!initInfo.containsKey(parameterName)) {
-			throw new RuntimeException("Context must have a " + parameterName + " set.");
+			String errorMessage = "InitInfo must contain " + parameterName;
+			log.logFatalUsingMessage(errorMessage);
+			throw new RuntimeException(errorMessage);
 		}
 	}
 
 	private void createAndSetGatekeeperTokenProvider() {
-		String gatekeeperUrl = getInitParameter("gatekeeperURL");
+		String gatekeeperUrl = initInfo.get("gatekeeperURL");
 		HttpHandlerFactory httpHandlerFactory = new HttpHandlerFactoryImp();
 		IdpLoginInstanceProvider.setGatekeeperTokenProvider(GatekeeperTokenProviderImp
 				.usingBaseUrlAndHttpHandlerFactory(gatekeeperUrl, httpHandlerFactory));
-	}
-
-	private String getInitParameter(String parameterName) {
-		ensureParameterExistsInInitInfo(parameterName);
-		return initInfo.get(parameterName);
 	}
 
 	@Override
