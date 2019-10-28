@@ -40,12 +40,12 @@ public class IdpLoginInitializer implements ServletContextListener {
 	private Logger log = LoggerProvider.getLoggerForClass(IdpLoginInitializer.class);
 
 	@Override
-	public void contextInitialized(ServletContextEvent arg0) {
-		servletContext = arg0.getServletContext();
+	public void contextInitialized(ServletContextEvent contextEvent) {
+		servletContext = contextEvent.getServletContext();
 		try {
 			tryToInitialize();
 		} catch (Exception e) {
-			throw new RuntimeException("Error starting IdpLogin: " + e.getMessage());
+			throw new RuntimeException("Error starting IdpLogin: " + e.getMessage(), e);
 		}
 	}
 

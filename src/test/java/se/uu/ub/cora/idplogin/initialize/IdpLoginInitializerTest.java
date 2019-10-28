@@ -21,6 +21,7 @@ package se.uu.ub.cora.idplogin.initialize;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -100,6 +101,19 @@ public class IdpLoginInitializerTest {
 				"http://localhost:8080/apptokenverifier/rest/apptoken/");
 		source.setInitParameter("gatekeeperURL", "http://localhost:8080/gatekeeper/");
 		idpLoginInitializer.contextInitialized(context);
+	}
+
+	@Test
+	public void testInitializeSystemWithoutMainSystemDomainSendsAlongInitalException() {
+		source.setInitParameter("tokenLogoutURL",
+				"http://localhost:8080/apptokenverifier/rest/apptoken/");
+		source.setInitParameter("gatekeeperURL", "http://localhost:8080/gatekeeper/");
+		try {
+
+			idpLoginInitializer.contextInitialized(context);
+		} catch (Exception e) {
+			assertTrue(e.getCause() instanceof RuntimeException);
+		}
 	}
 
 	@Test
