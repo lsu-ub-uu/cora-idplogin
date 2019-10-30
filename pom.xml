@@ -27,7 +27,10 @@
 		<logger.version>2.0.0</logger.version>
 		<gatekeepertokenprovider.version>2.0.0</gatekeepertokenprovider.version>
 		<javax.ws.rs.version>2.1.1</javax.ws.rs.version>
-		<jersey.version>2.27</jersey.version>
+		<jaxb-api.version>2.3.1</jaxb-api.version>
+		<jersey.version>2.29.1</jersey.version>
+		<servlet-api.version>4.0.1</servlet-api.version>
+		<encoder.version>1.2.2</encoder.version>
 	</properties>
 
 	<scm>
@@ -82,13 +85,13 @@
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
-			<version>4.0.1</version>
+			<version>${servlet-api.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.owasp.encoder</groupId>
 			<artifactId>encoder</artifactId>
-			<version>1.2.2</version>
+			<version>${encoder.version}</version>
 		</dependency>
 		<!-- The JAXB APIs are considered to be Java EE APIs, and therefore are 
 			no longer contained on the default class path in Java SE 9. In Java 11 they 
@@ -96,17 +99,13 @@
 		<dependency>
 			<groupId>javax.xml.bind</groupId>
 			<artifactId>jaxb-api</artifactId>
-			<version>2.3.0</version>
-		</dependency>
-		<dependency>
-			<groupId>javax.activation</groupId>
-			<artifactId>activation</artifactId>
-			<version>1.1.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.sun.activation</groupId>
-			<artifactId>javax.activation</artifactId>
-			<version>1.2.0</version>
+			<version>${jaxb-api.version}</version>
+			<exclusions>
+		        <exclusion>
+		            <groupId>javax.activation</groupId>
+		            <artifactId>javax.activation-api</artifactId>
+		        </exclusion>
+		    </exclusions>
 		</dependency>
 	</dependencies>
 	<build>
