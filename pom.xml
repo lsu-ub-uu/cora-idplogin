@@ -18,7 +18,7 @@
 	</parent>
 
 	<artifactId>idplogin</artifactId>
-	<version>2.2-SNAPSHOT</version>
+	<version>2.3-SNAPSHOT</version>
 	<packaging>war</packaging>
 
 	<name>idplogin</name>
