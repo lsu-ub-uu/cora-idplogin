@@ -62,12 +62,6 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>se.uu.ub.cora</groupId>
-			<artifactId>log4j</artifactId>
-			<version>${coralog4j.version}</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
 			<version>${testng.version}</version>
