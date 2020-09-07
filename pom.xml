@@ -28,7 +28,7 @@
 		<gatekeepertokenprovider.version>2.1.0</gatekeepertokenprovider.version>
 		<javax.ws.rs.version>2.1.1</javax.ws.rs.version>
 		<jaxb-api.version>2.4.0-b180830.0359</jaxb-api.version>
-		<jersey.version>3.0.0-M6</jersey.version>
+		<jersey.version>2.31</jersey.version>
 		<servlet-api.version>4.0.1</servlet-api.version>
 		<encoder.version>1.2.2</encoder.version>
 		<coralog4j.version>2.1.0</coralog4j.version>
