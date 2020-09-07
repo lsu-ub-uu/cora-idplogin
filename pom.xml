@@ -107,6 +107,12 @@
 			<groupId>javax.xml.bind</groupId>
 			<artifactId>jaxb-api</artifactId>
 			<version>${jaxb-api.version}</version>
+			<exclusions>
+		        <exclusion>
+		            <groupId>javax.activation</groupId>
+		            <artifactId>javax.activation-api</artifactId>
+		        </exclusion>
+		    </exclusions>
 		</dependency>
 	</dependencies>
 	<build>
