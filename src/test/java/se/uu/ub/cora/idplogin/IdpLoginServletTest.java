@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, 2018 Uppsala University Library
+ * Copyright 2017, 2018, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -24,9 +24,11 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringJoiner;
 
 import javax.servlet.http.HttpServlet;
 
+import org.owasp.encoder.Encode;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -56,7 +58,7 @@ public class IdpLoginServletTest {
 		requestSpy = new RequestSpy();
 		responseSpy = new ResponseSpy();
 
-		authToken = "someAuth\\x27Token";
+		authToken = "someAuth'Token";
 		validForNoSeconds = "278";
 		idInUserStorage = "someIdInUser\\x27Storage";
 
@@ -116,63 +118,40 @@ public class IdpLoginServletTest {
 
 	private String createExpectedHtml(String authToken, String validForNoSeconds,
 			String idInUserStorage) {
-		StringBuilder sb = new StringBuilder();
-		sb.append("<!DOCTYPE html>");
-		sb.append("\n");
-		sb.append("<html><head>");
-		sb.append("\n");
-		sb.append("<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>");
-		sb.append("\n");
 
-		sb.append("<script type=\"text/javascript\">");
-		sb.append("\n");
-		sb.append("window.onload = start;");
-		sb.append("\n");
-		sb.append("function start() {");
-		sb.append("\n");
-		sb.append("var authInfo = {");
-		sb.append("\n");
-		sb.append("\"userId\" : \"someIdFromLogin\",");
-		sb.append("\n");
-		sb.append("\"token\" : \"" + authToken + "\",");
-		sb.append("\n");
-		sb.append("\"idFromLogin\" : \"someIdFromLogin\",");
-		sb.append("\n");
-		sb.append("\"validForNoSeconds\" : \"" + validForNoSeconds + "\",");
-		sb.append("\n");
-		sb.append("\"actionLinks\" : {");
-		sb.append("\n");
-		sb.append("\"delete\" : {");
-		sb.append("\n");
-		sb.append("\"requestMethod\" : \"DELETE\",");
-		sb.append("\n");
-		sb.append("\"rel\" : \"delete\",");
-		sb.append("\n");
-		sb.append("\"url\" : \"http:\\/\\/localhost:8080\\/apptokenverifier\\/rest\\/apptoken\\/"
+		StringJoiner html = new StringJoiner("\n");
+		html.add("<!DOCTYPE html>");
+		html.add("<html><head>");
+		html.add("<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>");
+		html.add("<script type=\"text/javascript\">");
+		html.add("window.onload = start;");
+		html.add("function start() {");
+		html.add("var authInfo = {");
+		html.add("\"userId\" : \"someIdFromLogin\",");
+		html.add("\"token\" : \"" + Encode.forJavaScript(authToken) + "\",");
+		html.add("\"idFromLogin\" : \"someIdFromLogin\",");
+		html.add("\"validForNoSeconds\" : \"" + validForNoSeconds + "\",");
+		html.add("\"actionLinks\" : {");
+		html.add("\"delete\" : {");
+		html.add("\"requestMethod\" : \"DELETE\",");
+		html.add("\"rel\" : \"delete\",");
+		html.add("\"url\" : \"http:\\/\\/localhost:8080\\/apptokenverifier\\/rest\\/apptoken\\/"
 				+ idInUserStorage + "\"");
-		sb.append("\n");
-		sb.append("}");
-		sb.append("\n");
-		sb.append("}");
-		sb.append("\n");
-		sb.append("};");
-		sb.append("\n");
-		sb.append("window.opener.postMessage(authInfo, \"http:\\/\\/localhost:8080\");");
-		sb.append("\n");
-		sb.append("window.opener.focus();");
-		sb.append("\n");
-		sb.append("window.close();");
-		sb.append("\n");
-		sb.append("}");
-		sb.append("\n");
-		sb.append("</script>");
-		sb.append("\n");
-
-		sb.append("<body>");
-		sb.append("\n");
-		sb.append("</body></html>");
-		sb.append("\n");
-		return sb.toString();
+		html.add("}");
+		html.add("}");
+		html.add("};");
+		html.add("if(null!=window.opener){");
+		html.add("window.opener.postMessage(authInfo, \"http:\\/\\/localhost:8080\");");
+		html.add("window.opener.focus();");
+		html.add("window.close();");
+		html.add("}");
+		html.add("}");
+		html.add("</script>");
+		html.add("<body>");
+		html.add("token: " + Encode.forHtml(authToken));
+		html.add("</body></html>");
+		html.add("");
+		return html.toString();
 	}
 
 	@Test(expectedExceptions = IdpLoginOnlySharingKnownInformationException.class, expectedExceptionsMessageRegExp = ""

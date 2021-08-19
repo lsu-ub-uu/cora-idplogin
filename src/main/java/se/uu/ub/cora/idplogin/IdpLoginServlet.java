@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, 2018 Uppsala University Library
+ * Copyright 2017, 2018, 2021 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -91,6 +91,7 @@ public class IdpLoginServlet extends HttpServlet {
 		out.println("}");
 		out.println("}");
 		out.println("};");
+		out.println("if(null!=window.opener){");
 		out.println(
 				"window.opener.postMessage(authInfo, \""
 						+ Encode.forJavaScript(
@@ -100,9 +101,11 @@ public class IdpLoginServlet extends HttpServlet {
 		out.println("window.opener.focus();");
 		out.println("window.close();");
 		out.println("}");
+		out.println("}");
 		out.println("</script>");
 
 		out.println("<body>");
+		out.println("token: " + Encode.forHtml(authToken.token));
 		out.println("</body></html>");
 	}
 
