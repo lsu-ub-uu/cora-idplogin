@@ -26,12 +26,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
 
-import javax.servlet.http.HttpServlet;
-
 import org.owasp.encoder.Encode;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import jakarta.servlet.http.HttpServlet;
 import se.uu.ub.cora.gatekeepertokenprovider.UserInfo;
 import se.uu.ub.cora.idplogin.initialize.IdpLoginInstanceProvider;
 import se.uu.ub.cora.idplogin.json.IdpLoginOnlySharingKnownInformationException;
