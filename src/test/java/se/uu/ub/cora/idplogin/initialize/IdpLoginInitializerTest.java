@@ -23,12 +23,11 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletContextEvent;
 import se.uu.ub.cora.idplogin.log.LoggerFactorySpy;
 import se.uu.ub.cora.logger.LoggerProvider;
 
