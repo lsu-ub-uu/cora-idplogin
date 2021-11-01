@@ -24,12 +24,12 @@
 	<name>idplogin</name>
 
 	<properties>
-		<logger.version>2.3.0</logger.version>
-		<gatekeepertokenprovider.version>2.3.0</gatekeepertokenprovider.version>
-		<jersey.version>3.0.2</jersey.version>
+		<logger.version>2.4.0</logger.version>
+		<gatekeepertokenprovider.version>2.4.0</gatekeepertokenprovider.version>
+		<jersey.version>3.0.3</jersey.version>
 		<servlet-api.version>5.0.0</servlet-api.version>
 		<encoder.version>1.2.3</encoder.version>
-		<coralog4j.version>2.3.0</coralog4j.version>
+		<coralog4j.version>2.4.0</coralog4j.version>
 	</properties>
 
 	<scm>
