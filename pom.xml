@@ -29,7 +29,7 @@
 		<jersey.version>3.0.3</jersey.version>
 		<servlet-api.version>5.0.0</servlet-api.version>
 		<encoder.version>1.2.3</encoder.version>
-		<coralog4j.version>2.5.0</coralog4j.version>
+		<coralog4j.version>2.6.0</coralog4j.version>
 	</properties>
 
 	<scm>
