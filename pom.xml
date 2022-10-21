@@ -25,11 +25,11 @@
 
 	<properties>
 		<logger.version>2.5.0</logger.version>
-		<gatekeepertokenprovider.version>2.7.0</gatekeepertokenprovider.version>
+		<gatekeepertokenprovider.version>2.8.0</gatekeepertokenprovider.version>
 		<jersey.version>3.0.8</jersey.version>
 		<servlet-api.version>5.0.0</servlet-api.version>
 		<encoder.version>1.2.3</encoder.version>
-		<coralog4j.version>2.9.0</coralog4j.version>
+		<coralog4j.version>2.10.0</coralog4j.version>
 	</properties>
 
 	<scm>
