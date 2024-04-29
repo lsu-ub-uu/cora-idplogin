@@ -58,7 +58,7 @@ public class IdpLoginInitializerTest {
 		source.setInitParameter("gatekeeperURL", "http://localhost:8080/gatekeeper/");
 		source.setInitParameter("mainSystemDomain", "http://localhost:8080");
 		source.setInitParameter("tokenLogoutURL",
-				"http://localhost:8080/apptokenverifier/rest/apptoken/");
+				"http://localhost:8080/login/rest/apptoken/");
 		idpLoginInitializer.contextInitialized(context);
 	}
 
@@ -66,7 +66,7 @@ public class IdpLoginInitializerTest {
 			+ "starting IdpLogin: InitInfo must contain gatekeeperURL")
 	public void testInitializeSystemWithoutGatekeeperURL() {
 		source.setInitParameter("tokenLogoutURL",
-				"http://localhost:8080/apptokenverifier/rest/apptoken/");
+				"http://localhost:8080/login/rest/apptoken/");
 		source.setInitParameter("mainSystemDomain", "http://localhost:8080");
 
 		idpLoginInitializer.contextInitialized(context);
@@ -75,7 +75,7 @@ public class IdpLoginInitializerTest {
 	@Test
 	public void testErrorIsLoggedIfMissingGatekeeperURL() throws Exception {
 		source.setInitParameter("tokenLogoutURL",
-				"http://localhost:8080/apptokenverifier/rest/apptoken/");
+				"http://localhost:8080/login/rest/apptoken/");
 		source.setInitParameter("mainSystemDomain", "http://localhost:8080");
 		try {
 			idpLoginInitializer.contextInitialized(context);
@@ -97,7 +97,7 @@ public class IdpLoginInitializerTest {
 			+ "starting IdpLogin: InitInfo must contain mainSystemDomain")
 	public void testInitializeSystemWithoutMainSystemDomain() {
 		source.setInitParameter("tokenLogoutURL",
-				"http://localhost:8080/apptokenverifier/rest/apptoken/");
+				"http://localhost:8080/login/rest/apptoken/");
 		source.setInitParameter("gatekeeperURL", "http://localhost:8080/gatekeeper/");
 		idpLoginInitializer.contextInitialized(context);
 	}
@@ -105,7 +105,7 @@ public class IdpLoginInitializerTest {
 	@Test
 	public void testInitializeSystemWithoutMainSystemDomainSendsAlongInitalException() {
 		source.setInitParameter("tokenLogoutURL",
-				"http://localhost:8080/apptokenverifier/rest/apptoken/");
+				"http://localhost:8080/login/rest/apptoken/");
 		source.setInitParameter("gatekeeperURL", "http://localhost:8080/gatekeeper/");
 		try {
 
@@ -118,7 +118,7 @@ public class IdpLoginInitializerTest {
 	@Test
 	public void testErrorIsLoggedIfMissingMainSystemDomain() throws Exception {
 		source.setInitParameter("tokenLogoutURL",
-				"http://localhost:8080/apptokenverifier/rest/apptoken/");
+				"http://localhost:8080/login/rest/apptoken/");
 		source.setInitParameter("gatekeeperURL", "http://localhost:8080/gatekeeper/");
 		try {
 			idpLoginInitializer.contextInitialized(context);
@@ -165,7 +165,7 @@ public class IdpLoginInitializerTest {
 		assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 1),
 				"Found http://localhost:8080 as mainSystemDomain");
 		assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 2),
-				"Found http://localhost:8080/apptokenverifier/rest/apptoken/ as tokenLogoutURL");
+				"Found http://localhost:8080/login/rest/apptoken/ as tokenLogoutURL");
 		assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 3),
 				"Found http://localhost:8080/gatekeeper/ as gatekeeperURL");
 		assertEquals(loggerFactorySpy.getInfoLogMessageUsingClassNameAndNo(testedClassName, 4),

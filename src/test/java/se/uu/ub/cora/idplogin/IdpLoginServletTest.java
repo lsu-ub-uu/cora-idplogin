@@ -50,7 +50,7 @@ public class IdpLoginServletTest {
 	public void setup() {
 		gatekeeperTokenProvider = new GatekeeperTokenProviderSpy();
 		initInfo.put("mainSystemDomain", "http://localhost:8080");
-		initInfo.put("tokenLogoutURL", "http://localhost:8080/apptokenverifier/rest/apptoken/");
+		initInfo.put("tokenLogoutURL", "http://localhost:8080/login/rest/apptoken/");
 		IdpLoginInstanceProvider.setInitInfo(initInfo);
 		IdpLoginInstanceProvider.setGatekeeperTokenProvider(gatekeeperTokenProvider);
 		loginServlet = new IdpLoginServlet();
@@ -134,7 +134,7 @@ public class IdpLoginServletTest {
 		html.add("\"delete\" : {");
 		html.add("\"requestMethod\" : \"DELETE\",");
 		html.add("\"rel\" : \"delete\",");
-		html.add("\"url\" : \"http:\\/\\/localhost:8080\\/apptokenverifier\\/rest\\/apptoken\\/"
+		html.add("\"url\" : \"http:\\/\\/localhost:8080\\/login\\/rest\\/apptoken\\/"
 				+ idInUserStorage + "\"");
 		html.add("}");
 		html.add("}");

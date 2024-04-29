@@ -26,7 +26,7 @@ import org.testng.annotations.Test;
 import se.uu.ub.cora.gatekeepertokenprovider.AuthToken;
 
 public class AuthTokenToJsonConverterTest {
-	private String url = "http://epc.ub.uu.se/apptokenverifier/rest/apptoken/131313";
+	private String url = "http://epc.ub.uu.se/login/rest/apptoken/131313";
 	private AuthToken authToken = AuthToken.withIdAndValidForNoSecondsAndIdInUserStorageAndIdFromLogin(
 			"someId", 599, "someIdInUserStorage", "someIdFromLogin");
 
@@ -40,7 +40,7 @@ public class AuthTokenToJsonConverterTest {
 				+ "{\"name\":\"idFromLogin\",\"value\":\"someIdFromLogin\"}" + "]"
 				+ ",\"name\":\"authToken\"},"
 				+ "\"actionLinks\":{\"delete\":{\"requestMethod\":\"DELETE\"," + "\"rel\":\"delete\","
-				+ "\"url\":\"http://epc.ub.uu.se/apptokenverifier/rest/apptoken/131313\"}}}";
+				+ "\"url\":\"http://epc.ub.uu.se/login/rest/apptoken/131313\"}}}";
 		assertEquals(json, expected);
 	}
 
@@ -58,7 +58,7 @@ public class AuthTokenToJsonConverterTest {
 				+ "{\"name\":\"lastName\",\"value\":\"someLastName\"}" + "]"
 				+ ",\"name\":\"authToken\"},"
 				+ "\"actionLinks\":{\"delete\":{\"requestMethod\":\"DELETE\"," + "\"rel\":\"delete\","
-				+ "\"url\":\"http://epc.ub.uu.se/apptokenverifier/rest/apptoken/131313\"}}}";
+				+ "\"url\":\"http://epc.ub.uu.se/login/rest/apptoken/131313\"}}}";
 		assertEquals(json, expected);
 	}
 }
