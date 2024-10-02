@@ -26,21 +26,24 @@ import org.testng.annotations.Test;
 import se.uu.ub.cora.gatekeepertokenprovider.AuthToken;
 
 public class AuthTokenToJsonConverterTest {
-	private String url = "http://epc.ub.uu.se/login/rest/apptoken/131313";
-	private AuthToken authToken = AuthToken.withIdAndValidForNoSecondsAndIdInUserStorageAndIdFromLogin(
-			"someId", 599, "someIdInUserStorage", "someIdFromLogin");
+	private String url = "http://epc.ub.uu.se/login/rest/apptoken/someLoginId";
+	private AuthToken authToken = AuthToken
+			.withTokenAndValidForNoSecondsAndIdInUserStorageAndLoginId("someToken", 599,
+					"someIdInUserStorage", "someLoginId");
 
 	@Test
 	public void testAuthTokenToJsonConverter() {
 		AuthTokenToJsonConverter converter = new AuthTokenToJsonConverter(authToken, url);
 		String json = converter.convertAuthTokenToJson();
-		String expected = "{\"data\":{\"children\":[" + "{\"name\":\"id\",\"value\":\"someId\"},"
+		String expected = "{\"data\":{\"children\":["
+				+ "{\"name\":\"token\",\"value\":\"someToken\"},"
 				+ "{\"name\":\"validForNoSeconds\",\"value\":\"599\"},"
 				+ "{\"name\":\"idInUserStorage\",\"value\":\"someIdInUserStorage\"},"
-				+ "{\"name\":\"idFromLogin\",\"value\":\"someIdFromLogin\"}" + "]"
+				+ "{\"name\":\"loginId\",\"value\":\"someLoginId\"}" + "]"
 				+ ",\"name\":\"authToken\"},"
-				+ "\"actionLinks\":{\"delete\":{\"requestMethod\":\"DELETE\"," + "\"rel\":\"delete\","
-				+ "\"url\":\"http://epc.ub.uu.se/login/rest/apptoken/131313\"}}}";
+				+ "\"actionLinks\":{\"delete\":{\"requestMethod\":\"DELETE\","
+				+ "\"rel\":\"delete\","
+				+ "\"url\":\"http://epc.ub.uu.se/login/rest/apptoken/someLoginId\"}}}";
 		assertEquals(json, expected);
 	}
 
@@ -50,15 +53,17 @@ public class AuthTokenToJsonConverterTest {
 		authToken.lastName = "someLastName";
 		AuthTokenToJsonConverter converter = new AuthTokenToJsonConverter(authToken, url);
 		String json = converter.convertAuthTokenToJson();
-		String expected = "{\"data\":{\"children\":[" + "{\"name\":\"id\",\"value\":\"someId\"},"
+		String expected = "{\"data\":{\"children\":["
+				+ "{\"name\":\"token\",\"value\":\"someToken\"},"
 				+ "{\"name\":\"validForNoSeconds\",\"value\":\"599\"}," + "{"
 				+ "\"name\":\"idInUserStorage\",\"value\":\"someIdInUserStorage\"},"
-				+ "{\"name\":\"idFromLogin\",\"value\":\"someIdFromLogin\"},"
+				+ "{\"name\":\"loginId\",\"value\":\"someLoginId\"},"
 				+ "{\"name\":\"firstName\",\"value\":\"someFirstName\"},"
 				+ "{\"name\":\"lastName\",\"value\":\"someLastName\"}" + "]"
 				+ ",\"name\":\"authToken\"},"
-				+ "\"actionLinks\":{\"delete\":{\"requestMethod\":\"DELETE\"," + "\"rel\":\"delete\","
-				+ "\"url\":\"http://epc.ub.uu.se/login/rest/apptoken/131313\"}}}";
+				+ "\"actionLinks\":{\"delete\":{\"requestMethod\":\"DELETE\","
+				+ "\"rel\":\"delete\","
+				+ "\"url\":\"http://epc.ub.uu.se/login/rest/apptoken/someLoginId\"}}}";
 		assertEquals(json, expected);
 	}
 }

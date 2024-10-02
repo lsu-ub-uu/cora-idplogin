@@ -71,12 +71,12 @@ public class IdpLoginServlet extends HttpServlet {
 		out.println("window.onload = start;");
 		out.println("function start() {");
 		out.println("var authInfo = {");
-		out.println("\"userId\" : \"" + Encode.forJavaScript(authToken.idFromLogin) + "\",");
+		out.println("\"userId\" : \"" + Encode.forJavaScript(authToken.loginId) + "\",");
 		out.print("\"token\" : \"");
 		out.print(Encode.forJavaScript(authToken.token));
 		out.println("\",");
-		out.print("\"idFromLogin\" : \"");
-		out.print(Encode.forJavaScript(authToken.idFromLogin));
+		out.print("\"loginId\" : \"");
+		out.print(Encode.forJavaScript(authToken.loginId));
 		out.println("\",");
 		out.print("\"validForNoSeconds\" : \"");
 		out.print(authToken.validForNoSeconds);
@@ -85,7 +85,7 @@ public class IdpLoginServlet extends HttpServlet {
 		out.println("\"delete\" : {");
 		out.println("\"requestMethod\" : \"DELETE\",");
 		out.println("\"rel\" : \"delete\",");
-		out.print("\"url\" : \"" + Encode.forJavaScript(url + authToken.idInUserStorage));
+		out.print("\"url\" : \"" + Encode.forJavaScript(url + authToken.loginId));
 		out.println("\"");
 		out.println("}");
 		out.println("}");
