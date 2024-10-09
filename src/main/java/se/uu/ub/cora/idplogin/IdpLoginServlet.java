@@ -66,26 +66,25 @@ public class IdpLoginServlet extends HttpServlet {
 		out.println("<!DOCTYPE html>");
 		out.println("<html><head>");
 		out.println("<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>");
-
 		out.println("<script type=\"text/javascript\">");
 		out.println("window.onload = start;");
 		out.println("function start() {");
 		out.println("var authInfo = {");
-		out.println("\"userId\" : \"" + Encode.forJavaScript(authToken.loginId) + "\",");
+		out.println("\"userId\" : \"" + Encode.forJavaScript(authToken.idInUserStorage()) + "\",");
 		out.print("\"token\" : \"");
-		out.print(Encode.forJavaScript(authToken.token));
+		out.print(Encode.forJavaScript(authToken.token()));
 		out.println("\",");
 		out.print("\"loginId\" : \"");
-		out.print(Encode.forJavaScript(authToken.loginId));
+		out.print(Encode.forJavaScript(authToken.loginId()));
 		out.println("\",");
 		out.print("\"validForNoSeconds\" : \"");
-		out.print(authToken.validForNoSeconds);
+		out.print(authToken.validForNoSeconds());
 		out.println("\",");
 		out.println("\"actionLinks\" : {");
 		out.println("\"delete\" : {");
 		out.println("\"requestMethod\" : \"DELETE\",");
 		out.println("\"rel\" : \"delete\",");
-		out.print("\"url\" : \"" + Encode.forJavaScript(url + authToken.loginId));
+		out.print("\"url\" : \"" + Encode.forJavaScript(url + authToken.tokenId()));
 		out.println("\"");
 		out.println("}");
 		out.println("}");
@@ -96,15 +95,13 @@ public class IdpLoginServlet extends HttpServlet {
 						+ Encode.forJavaScript(
 								IdpLoginInstanceProvider.getInitInfo().get("mainSystemDomain"))
 						+ "\");");
-
 		out.println("window.opener.focus();");
 		out.println("window.close();");
 		out.println("}");
 		out.println("}");
 		out.println("</script>");
-
 		out.println("<body>");
-		out.println("token: " + Encode.forHtml(authToken.token));
+		out.println("token: " + Encode.forHtml(authToken.token()));
 		out.println("</body></html>");
 	}
 

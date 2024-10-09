@@ -21,6 +21,7 @@ package se.uu.ub.cora.idplogin;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import se.uu.ub.cora.gatekeepertokenprovider.AuthToken;
 import se.uu.ub.cora.gatekeepertokenprovider.GatekeeperTokenProvider;
@@ -34,13 +35,13 @@ public class GatekeeperTokenProviderSpy implements GatekeeperTokenProvider {
 	@Override
 	public AuthToken getAuthTokenForUserInfo(UserInfo userInfo) {
 		userInfos.add(userInfo);
-		return AuthToken.withTokenAndValidForNoSecondsAndIdInUserStorageAndLoginId(
-				"someAuth'Token", 278, "someIdInUser'Storage", "loginId");
+		return new AuthToken("someAuth'Token", "someTokenId", 278, "someIdInUser'Storage",
+				"loginId", Optional.empty(), Optional.empty());
 	}
 
 	@Override
-	public void removeAuthTokenForUser(String idInUserStorage, String authToken) {
-		deletedUserInfos.add(idInUserStorage);
+	public void removeAuthToken(String tokenId, String authToken) {
+		deletedUserInfos.add(tokenId);
 
 	}
 

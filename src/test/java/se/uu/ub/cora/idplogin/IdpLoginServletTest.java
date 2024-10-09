@@ -59,8 +59,6 @@ public class IdpLoginServletTest {
 
 		authToken = "someAuth'Token";
 		validForNoSeconds = "278";
-		// idInUserStorage = "someIdInUser\\x27Storage";
-
 	}
 
 	@Test
@@ -126,7 +124,7 @@ public class IdpLoginServletTest {
 		html.add("window.onload = start;");
 		html.add("function start() {");
 		html.add("var authInfo = {");
-		html.add("\"userId\" : \"loginId\",");
+		html.add("\"userId\" : \"someIdInUser\\x27Storage\",");
 		html.add("\"token\" : \"" + Encode.forJavaScript(authToken) + "\",");
 		html.add("\"loginId\" : \"loginId\",");
 		html.add("\"validForNoSeconds\" : \"" + validForNoSeconds + "\",");
@@ -134,7 +132,7 @@ public class IdpLoginServletTest {
 		html.add("\"delete\" : {");
 		html.add("\"requestMethod\" : \"DELETE\",");
 		html.add("\"rel\" : \"delete\",");
-		html.add("\"url\" : \"http:\\/\\/localhost:8080\\/login\\/rest\\/apptoken\\/loginId\"");
+		html.add("\"url\" : \"http:\\/\\/localhost:8080\\/login\\/rest\\/apptoken\\/someTokenId\"");
 		html.add("}");
 		html.add("}");
 		html.add("};");
