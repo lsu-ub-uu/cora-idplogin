@@ -43,14 +43,13 @@ public class IdpLoginServletTest {
 	private ResponseSpy responseSpy;
 	private String authToken;
 	private String validForNoSeconds;
-	// private String idInUserStorage;
 	private Map<String, String> initInfo = new HashMap<>();
 
 	@BeforeMethod
 	public void setup() {
 		gatekeeperTokenProvider = new GatekeeperTokenProviderSpy();
 		initInfo.put("mainSystemDomain", "http://localhost:8080");
-		initInfo.put("tokenLogoutURL", "http://localhost:8080/login/rest/apptoken/");
+		initInfo.put("tokenLogoutURL", "http://localhost:8080/login/rest/");
 		IdpLoginInstanceProvider.setInitInfo(initInfo);
 		IdpLoginInstanceProvider.setGatekeeperTokenProvider(gatekeeperTokenProvider);
 		loginServlet = new IdpLoginServlet();
@@ -132,7 +131,8 @@ public class IdpLoginServletTest {
 		html.add("\"delete\" : {");
 		html.add("\"requestMethod\" : \"DELETE\",");
 		html.add("\"rel\" : \"delete\",");
-		html.add("\"url\" : \"http:\\/\\/localhost:8080\\/login\\/rest\\/apptoken\\/someTokenId\"");
+		html.add(
+				"\"url\" : \"http:\\/\\/localhost:8080\\/login\\/rest\\/authToken\\/someTokenId\"");
 		html.add("}");
 		html.add("}");
 		html.add("};");
