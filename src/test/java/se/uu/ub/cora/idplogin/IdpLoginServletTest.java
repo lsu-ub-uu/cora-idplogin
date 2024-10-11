@@ -43,14 +43,13 @@ public class IdpLoginServletTest {
 	private ResponseSpy responseSpy;
 	private String authToken;
 	private String validForNoSeconds;
-	private String idInUserStorage;
 	private Map<String, String> initInfo = new HashMap<>();
 
 	@BeforeMethod
 	public void setup() {
 		gatekeeperTokenProvider = new GatekeeperTokenProviderSpy();
 		initInfo.put("mainSystemDomain", "http://localhost:8080");
-		initInfo.put("tokenLogoutURL", "http://localhost:8080/login/rest/apptoken/");
+		initInfo.put("tokenLogoutURL", "http://localhost:8080/login/rest/");
 		IdpLoginInstanceProvider.setInitInfo(initInfo);
 		IdpLoginInstanceProvider.setGatekeeperTokenProvider(gatekeeperTokenProvider);
 		loginServlet = new IdpLoginServlet();
@@ -59,8 +58,6 @@ public class IdpLoginServletTest {
 
 		authToken = "someAuth'Token";
 		validForNoSeconds = "278";
-		idInUserStorage = "someIdInUser\\x27Storage";
-
 	}
 
 	@Test
@@ -71,10 +68,11 @@ public class IdpLoginServletTest {
 	@Test
 	public void testDoGetEppnSentOnToGateKeeper() throws Exception {
 		requestSpy.headers.put("eppn", "test@testing.org");
+
 		loginServlet.doGet(requestSpy, responseSpy);
 
 		UserInfo userInfo = gatekeeperTokenProvider.userInfos.get(0);
-		assertEquals(userInfo.idFromLogin, "test@testing.org");
+		assertEquals(userInfo.loginId, "test@testing.org");
 	}
 
 	@Test
@@ -83,7 +81,7 @@ public class IdpLoginServletTest {
 		requestSpy.headers.put("eppn", "test@testing.org");
 		loginServlet.doGet(requestSpy, responseSpy);
 
-		String expectedHtml = createExpectedHtml(authToken, validForNoSeconds, idInUserStorage);
+		String expectedHtml = createExpectedHtml(authToken, validForNoSeconds);
 		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
 	}
 
@@ -93,7 +91,7 @@ public class IdpLoginServletTest {
 		requestSpy.headers.put("eppn", "test@testing.org");
 		loginServlet.doGet(requestSpy, responseSpy);
 
-		String expectedHtml = createExpectedHtml(authToken, validForNoSeconds, idInUserStorage);
+		String expectedHtml = createExpectedHtml(authToken, validForNoSeconds);
 		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
 	}
 
@@ -102,7 +100,7 @@ public class IdpLoginServletTest {
 		requestSpy.headers.put("eppn", "test@testing.org");
 		loginServlet.doGet(requestSpy, responseSpy);
 
-		String expectedHtml = createExpectedHtml(authToken, validForNoSeconds, idInUserStorage);
+		String expectedHtml = createExpectedHtml(authToken, validForNoSeconds);
 		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
 	}
 
@@ -111,12 +109,11 @@ public class IdpLoginServletTest {
 		requestSpy.headers.put("eppn", "test@testing.org");
 		loginServlet.doGet(requestSpy, responseSpy);
 
-		String expectedHtml = createExpectedHtml(authToken, validForNoSeconds, idInUserStorage);
+		String expectedHtml = createExpectedHtml(authToken, validForNoSeconds);
 		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
 	}
 
-	private String createExpectedHtml(String authToken, String validForNoSeconds,
-			String idInUserStorage) {
+	private String createExpectedHtml(String authToken, String validForNoSeconds) {
 
 		StringJoiner html = new StringJoiner("\n");
 		html.add("<!DOCTYPE html>");
@@ -126,16 +123,16 @@ public class IdpLoginServletTest {
 		html.add("window.onload = start;");
 		html.add("function start() {");
 		html.add("var authInfo = {");
-		html.add("\"userId\" : \"someIdFromLogin\",");
+		html.add("\"userId\" : \"someIdInUser\\x27Storage\",");
 		html.add("\"token\" : \"" + Encode.forJavaScript(authToken) + "\",");
-		html.add("\"idFromLogin\" : \"someIdFromLogin\",");
+		html.add("\"loginId\" : \"loginId\",");
 		html.add("\"validForNoSeconds\" : \"" + validForNoSeconds + "\",");
 		html.add("\"actionLinks\" : {");
 		html.add("\"delete\" : {");
 		html.add("\"requestMethod\" : \"DELETE\",");
 		html.add("\"rel\" : \"delete\",");
-		html.add("\"url\" : \"http:\\/\\/localhost:8080\\/login\\/rest\\/apptoken\\/"
-				+ idInUserStorage + "\"");
+		html.add(
+				"\"url\" : \"http:\\/\\/localhost:8080\\/login\\/rest\\/authToken\\/someTokenId\"");
 		html.add("}");
 		html.add("}");
 		html.add("};");
@@ -160,7 +157,7 @@ public class IdpLoginServletTest {
 		responseSpy.throwIOExceptionOnGetWriter = true;
 		loginServlet.doGet(requestSpy, responseSpy);
 
-		String expectedHtml = createExpectedHtml(authToken, validForNoSeconds, idInUserStorage);
+		String expectedHtml = createExpectedHtml(authToken, validForNoSeconds);
 		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
 	}
 }
