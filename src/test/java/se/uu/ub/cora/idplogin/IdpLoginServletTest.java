@@ -49,7 +49,7 @@ public class IdpLoginServletTest {
 	public void setup() {
 		gatekeeperTokenProvider = new GatekeeperTokenProviderSpy();
 		initInfo.put("mainSystemDomain", "http://localhost:8080");
-		initInfo.put("tokenLogoutURL", "http://localhost:8080/login/rest/");
+		initInfo.put("tokenLogoutURL", "http://localhost:8080/login/rest/authToken/");
 		IdpLoginInstanceProvider.setInitInfo(initInfo);
 		IdpLoginInstanceProvider.setGatekeeperTokenProvider(gatekeeperTokenProvider);
 		loginServlet = new IdpLoginServlet();

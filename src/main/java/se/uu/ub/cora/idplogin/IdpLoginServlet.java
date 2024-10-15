@@ -84,7 +84,7 @@ public class IdpLoginServlet extends HttpServlet {
 		out.println("\"delete\" : {");
 		out.println("\"requestMethod\" : \"DELETE\",");
 		out.println("\"rel\" : \"delete\",");
-		out.print("\"url\" : \"" + Encode.forJavaScript(url + "authToken/" + authToken.tokenId()));
+		out.print("\"url\" : \"" + Encode.forJavaScript(url + authToken.tokenId()));
 		out.println("\"");
 		out.println("}");
 		out.println("}");
