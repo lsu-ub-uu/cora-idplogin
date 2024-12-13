@@ -35,7 +35,7 @@ public class GatekeeperTokenProviderSpy implements GatekeeperTokenProvider {
 	@Override
 	public AuthToken getAuthTokenForUserInfo(UserInfo userInfo) {
 		userInfos.add(userInfo);
-		return new AuthToken("someAuth'Token", "someTokenId", 278, "someIdInUser'Storage",
+		return new AuthToken("someAuth'Token", "someTokenId", 100L, 200L, "someIdInUser'Storage",
 				"loginId", Optional.empty(), Optional.empty());
 	}
 

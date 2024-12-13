@@ -77,8 +77,11 @@ public class IdpLoginServlet extends HttpServlet {
 		out.print("\"loginId\" : \"");
 		out.print(Encode.forJavaScript(authToken.loginId()));
 		out.println("\",");
-		out.print("\"validForNoSeconds\" : \"");
-		out.print(authToken.validForNoSeconds());
+		out.print("\"validUntil\" : \"");
+		out.print(authToken.validUntil());
+		out.println("\",");
+		out.print("\"renewUntil\" : \"");
+		out.print(authToken.renewUntil());
 		out.println("\",");
 		out.println("\"actionLinks\" : {");
 		out.println("\"delete\" : {");

@@ -42,7 +42,8 @@ public class IdpLoginServletTest {
 	private RequestSpy requestSpy;
 	private ResponseSpy responseSpy;
 	private String authToken;
-	private String validForNoSeconds;
+	private String validUntil;
+	private String renewUntil;
 	private Map<String, String> initInfo = new HashMap<>();
 
 	@BeforeMethod
@@ -57,7 +58,8 @@ public class IdpLoginServletTest {
 		responseSpy = new ResponseSpy();
 
 		authToken = "someAuth'Token";
-		validForNoSeconds = "278";
+		validUntil = "100";
+		renewUntil = "200";
 	}
 
 	@Test
@@ -81,7 +83,7 @@ public class IdpLoginServletTest {
 		requestSpy.headers.put("eppn", "test@testing.org");
 		loginServlet.doGet(requestSpy, responseSpy);
 
-		String expectedHtml = createExpectedHtml(authToken, validForNoSeconds);
+		String expectedHtml = createExpectedHtml(authToken, validUntil, renewUntil);
 		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
 	}
 
@@ -91,7 +93,7 @@ public class IdpLoginServletTest {
 		requestSpy.headers.put("eppn", "test@testing.org");
 		loginServlet.doGet(requestSpy, responseSpy);
 
-		String expectedHtml = createExpectedHtml(authToken, validForNoSeconds);
+		String expectedHtml = createExpectedHtml(authToken, validUntil, renewUntil);
 		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
 	}
 
@@ -100,7 +102,7 @@ public class IdpLoginServletTest {
 		requestSpy.headers.put("eppn", "test@testing.org");
 		loginServlet.doGet(requestSpy, responseSpy);
 
-		String expectedHtml = createExpectedHtml(authToken, validForNoSeconds);
+		String expectedHtml = createExpectedHtml(authToken, validUntil, renewUntil);
 		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
 	}
 
@@ -109,11 +111,11 @@ public class IdpLoginServletTest {
 		requestSpy.headers.put("eppn", "test@testing.org");
 		loginServlet.doGet(requestSpy, responseSpy);
 
-		String expectedHtml = createExpectedHtml(authToken, validForNoSeconds);
+		String expectedHtml = createExpectedHtml(authToken, validUntil, renewUntil);
 		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
 	}
 
-	private String createExpectedHtml(String authToken, String validForNoSeconds) {
+	private String createExpectedHtml(String authToken, String validUntil, String renewUntil) {
 
 		StringJoiner html = new StringJoiner("\n");
 		html.add("<!DOCTYPE html>");
@@ -126,7 +128,8 @@ public class IdpLoginServletTest {
 		html.add("\"userId\" : \"someIdInUser\\x27Storage\",");
 		html.add("\"token\" : \"" + Encode.forJavaScript(authToken) + "\",");
 		html.add("\"loginId\" : \"loginId\",");
-		html.add("\"validForNoSeconds\" : \"" + validForNoSeconds + "\",");
+		html.add("\"validUntil\" : \"" + validUntil + "\",");
+		html.add("\"renewUntil\" : \"" + renewUntil + "\",");
 		html.add("\"actionLinks\" : {");
 		html.add("\"delete\" : {");
 		html.add("\"requestMethod\" : \"DELETE\",");
@@ -157,7 +160,7 @@ public class IdpLoginServletTest {
 		responseSpy.throwIOExceptionOnGetWriter = true;
 		loginServlet.doGet(requestSpy, responseSpy);
 
-		String expectedHtml = createExpectedHtml(authToken, validForNoSeconds);
+		String expectedHtml = createExpectedHtml(authToken, validUntil, renewUntil);
 		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
 	}
 }
