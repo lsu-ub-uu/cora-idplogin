@@ -45,4 +45,9 @@ public class GatekeeperTokenProviderSpy implements GatekeeperTokenProvider {
 
 	}
 
+	@Override
+	public AuthToken renewAuthToken(String tokenId, String token) {
+		return null;
+	}
+
 }
