@@ -38,7 +38,6 @@ public class GatekeeperTokenProviderErrorSpy implements GatekeeperTokenProvider 
 
 	@Override
 	public AuthToken renewAuthToken(String tokenId, String token) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
