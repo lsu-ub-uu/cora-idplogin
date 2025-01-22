@@ -116,30 +116,37 @@ public class IdpLoginServletTest {
 						<script type="text/javascript">
 							window.onload = start;
 							function start() {
-								var authInfo = {
-									userId : "%s",
-									loginId : "%s",
-									token : "%s",
-									firstName : "%s",
-									lastName : "%s",
-									validUntil : "%s",
-									renewUntil : "%s",
-									actionLinks : {
-										renew : {
-											requestMethod : "POST",
-											rel : "renew",
-											url : "%s",
-											accept: "application/vnd.uub.authToken+json"
+								var authentication = {
+									authentication : {
+										data : {
+											children : [
+												{name : "token", value : "%s"},
+												{name : "validUntil", value : "%s"},
+												{name : "renewUntil", value : "%s"},
+												{name : "userId", value : "%s"},
+												{name : "loginId", value : "%s"},
+												{name : "firstName", value : "%s"},
+												{name : "lastName", value : "%s"}
+											],
+											name : authToken
 										},
-										delete : {
-											requestMethod : "DELETE",
-											rel : "delete",
-											url : "%s"
+										actionLinks : {
+											renew : {
+												requestMethod : "POST",
+												rel : "renew",
+												url : "%s",
+												accept: "application/vnd.uub.authentication+json"
+											},
+											delete : {
+												requestMethod : "DELETE",
+												rel : "delete",
+												url : "%s"
+											}
 										}
 									}
 								};
 								if(null!=window.opener){
-									window.opener.postMessage(authInfo, "%s");
+									window.opener.postMessage(authentication, "%s");
 									window.opener.focus();
 									window.close();
 								}
