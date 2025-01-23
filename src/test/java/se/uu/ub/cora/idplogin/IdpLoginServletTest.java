@@ -57,8 +57,8 @@ public class IdpLoginServletTest {
 		requestSpy = new RequestSpy();
 		responseSpy = new ResponseSpy();
 		requestSpy.headers.put("eppn", "test@testing.org");
-		requestSpy.headers.put("sn", "someLastName");
-		requestSpy.headers.put("givenName", "someFirstName");
+		requestSpy.headers.put("sn", "some'LastName");
+		requestSpy.headers.put("givenName", "some'FirstName");
 
 		validUntil = "100";
 		renewUntil = "200";
@@ -101,10 +101,12 @@ public class IdpLoginServletTest {
 	}
 
 	private String createExpectedHtml(String validUntil, String renewUntil) {
-		String idInUserStorageEscaped = "someIdInUser\\x27Storage";
+		String userIdEscaped = "someIdInUser\\x27Storage";
 		String tokenEscaped = "someAuth\\x27Token";
+		String lastNameEscaped = "some\\x27LastName";
+		String firstNameEscaped = "some\\x27FirstName";
 		String loginIdEscaped = "loginId";
-		String tokenIdEscaped = "http:\\/\\/localhost:8080\\/login\\/rest\\/authToken\\/someTokenId";
+		String actionUrlEscaped = "http:\\/\\/localhost:8080\\/login\\/rest\\/authToken\\/someTokenId";
 		String mainSystemDomainEscaped = "http:\\/\\/localhost:8080";
 		String tokenForHtml = "someAuth&#39;Token";
 
@@ -117,30 +119,30 @@ public class IdpLoginServletTest {
 							window.onload = start;
 							function start() {
 								var authentication = {
-									authentication : {
-										data : {
-											children : [
-												{name : "token", value : "%s"},
-												{name : "validUntil", value : "%s"},
-												{name : "renewUntil", value : "%s"},
-												{name : "userId", value : "%s"},
-												{name : "loginId", value : "%s"},
-												{name : "firstName", value : "%s"},
-												{name : "lastName", value : "%s"}
+									"authentication" : {
+										"data" : {
+											"children" : [
+												{"name" : "token", "value" : "%s"},
+												{"name" : "validUntil", "value" : "%s"},
+												{"name" : "renewUntil", "value" : "%s"},
+												{"name" : "userId", "value" : "%s"},
+												{"name" : "loginId", "value" : "%s"},
+												{"name" : "firstName", "value" : "%s"},
+												{"name" : "lastName", "value" : "%s"}
 											],
-											name : authToken
+											"name" : "authToken"
 										},
-										actionLinks : {
-											renew : {
-												requestMethod : "POST",
-												rel : "renew",
-												url : "%s",
-												accept: "application/vnd.uub.authentication+json"
+										"actionLinks" : {
+											"renew" : {
+												"requestMethod" : "POST",
+												"rel" : "renew",
+												"url" : "%s",
+												"accept": "application/vnd.uub.authentication+json"
 											},
-											delete : {
-												requestMethod : "DELETE",
-												rel : "delete",
-												url : "%s"
+											"delete" : {
+												"requestMethod" : "DELETE",
+												"rel" : "delete",
+												"url" : "%s"
 											}
 										}
 									}
@@ -157,8 +159,8 @@ public class IdpLoginServletTest {
 						token: %s
 					</body>
 				</html>
-				""".formatted(idInUserStorageEscaped, loginIdEscaped, tokenEscaped, "someFirstName",
-				"someLastName", validUntil, renewUntil, tokenIdEscaped, tokenIdEscaped,
+				""".formatted(tokenEscaped, validUntil, renewUntil, userIdEscaped, loginIdEscaped,
+				firstNameEscaped, lastNameEscaped, actionUrlEscaped, actionUrlEscaped,
 				mainSystemDomainEscaped, tokenForHtml);
 	}
 

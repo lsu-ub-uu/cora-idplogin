@@ -69,7 +69,9 @@ public class IdpLoginServlet extends HttpServlet {
 		String idInUserStorageEscaped = Encode.forJavaScript(authToken.idInUserStorage());
 		String tokenEscaped = Encode.forJavaScript(authToken.token());
 		String loginIdEscaped = Encode.forJavaScript(authToken.loginId());
-		String tokenIdEscaped = Encode.forJavaScript(url + authToken.tokenId());
+		String loginUrlEscaped = Encode.forJavaScript(url + authToken.tokenId());
+		String firstNameEscaped = Encode.forJavaScript(firstName);
+		String lastNameEscaped = Encode.forJavaScript(lastName);
 		String mainSystemDomainEscaped = Encode
 				.forJavaScript(IdpLoginInstanceProvider.getInitInfo().get("mainSystemDomain"));
 		String tokenForHtml = Encode.forHtml(authToken.token());
@@ -82,30 +84,30 @@ public class IdpLoginServlet extends HttpServlet {
 							window.onload = start;
 							function start() {
 								var authentication = {
-									authentication : {
-										data : {
-											children : [
-												{name : "token", value : "%s"},
-												{name : "validUntil", value : "%s"},
-												{name : "renewUntil", value : "%s"},
-												{name : "userId", value : "%s"},
-												{name : "loginId", value : "%s"},
-												{name : "firstName", value : "%s"},
-												{name : "lastName", value : "%s"}
+									"authentication" : {
+										"data" : {
+											"children" : [
+												{"name" : "token", "value" : "%s"},
+												{"name" : "validUntil", "value" : "%s"},
+												{"name" : "renewUntil", "value" : "%s"},
+												{"name" : "userId", "value" : "%s"},
+												{"name" : "loginId", "value" : "%s"},
+												{"name" : "firstName", "value" : "%s"},
+												{"name" : "lastName", "value" : "%s"}
 											],
-											name : authToken
+											"name" : "authToken"
 										},
-										actionLinks : {
-											renew : {
-												requestMethod : "POST",
-												rel : "renew",
-												url : "%s",
-												accept: "application/vnd.uub.authentication+json"
+										"actionLinks" : {
+											"renew" : {
+												"requestMethod" : "POST",
+												"rel" : "renew",
+												"url" : "%s",
+												"accept": "application/vnd.uub.authentication+json"
 											},
-											delete : {
-												requestMethod : "DELETE",
-												rel : "delete",
-												url : "%s"
+											"delete" : {
+												"requestMethod" : "DELETE",
+												"rel" : "delete",
+												"url" : "%s"
 											}
 										}
 									}
@@ -122,9 +124,9 @@ public class IdpLoginServlet extends HttpServlet {
 						token: %s
 					</body>
 				</html>
-				""".formatted(idInUserStorageEscaped, loginIdEscaped, tokenEscaped, firstName,
-				lastName, authToken.validUntil(), authToken.renewUntil(), tokenIdEscaped,
-				tokenIdEscaped, mainSystemDomainEscaped, tokenForHtml);
+				""".formatted(tokenEscaped, authToken.validUntil(), authToken.renewUntil(),
+				idInUserStorageEscaped, loginIdEscaped, firstNameEscaped, lastNameEscaped,
+				loginUrlEscaped, loginUrlEscaped, mainSystemDomainEscaped, tokenForHtml);
 		out.print(outBlock);
 	}
 
