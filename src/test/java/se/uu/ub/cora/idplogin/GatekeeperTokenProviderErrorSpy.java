@@ -36,4 +36,9 @@ public class GatekeeperTokenProviderErrorSpy implements GatekeeperTokenProvider 
 		throw new AuthenticationException("authToken could not be removed");
 	}
 
+	@Override
+	public AuthToken renewAuthToken(String tokenId, String token) {
+		return null;
+	}
+
 }

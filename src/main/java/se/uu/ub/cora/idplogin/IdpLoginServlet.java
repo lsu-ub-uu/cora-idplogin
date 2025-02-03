@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, 2018, 2021 Uppsala University Library
+ * Copyright 2017, 2018, 2021, 2025 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -41,68 +41,93 @@ public class IdpLoginServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		String userIdFromIdp = request.getHeader("eppn");
+		String lastName = request.getHeader("sn");
+		String firstName = request.getHeader("givenName");
 		UserInfo userInfo = UserInfo.withLoginId(userIdFromIdp);
 		AuthToken authTokenFromGatekeeper = getNewAuthTokenFromGatekeeper(userInfo);
 
 		String url = IdpLoginInstanceProvider.getInitInfo().get("tokenLogoutURL");
 
 		tryToCreateAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrlAndUserId(response,
-				authTokenFromGatekeeper, url, userIdFromIdp);
+				authTokenFromGatekeeper, url, userIdFromIdp, firstName, lastName);
 	}
 
 	private void tryToCreateAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrlAndUserId(
 			HttpServletResponse response, AuthToken authTokenFromGatekeeper, String url,
-			String userIdFromIdp) {
+			String userIdFromIdp, String firstName, String lastName) {
 		try (PrintWriter out = response.getWriter();) {
 			createAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrl(authTokenFromGatekeeper, url,
-					out);
+					out, firstName, lastName);
 		} catch (IOException e) {
 			throw IdpLoginOnlySharingKnownInformationException.forUserId(userIdFromIdp);
 		}
 	}
 
 	private void createAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrl(AuthToken authToken,
-			String url, PrintWriter out) {
-		out.println("<!DOCTYPE html>");
-		out.println("<html><head>");
-		out.println("<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>");
-		out.println("<script type=\"text/javascript\">");
-		out.println("window.onload = start;");
-		out.println("function start() {");
-		out.println("var authInfo = {");
-		out.println("\"userId\" : \"" + Encode.forJavaScript(authToken.idInUserStorage()) + "\",");
-		out.print("\"token\" : \"");
-		out.print(Encode.forJavaScript(authToken.token()));
-		out.println("\",");
-		out.print("\"loginId\" : \"");
-		out.print(Encode.forJavaScript(authToken.loginId()));
-		out.println("\",");
-		out.print("\"validForNoSeconds\" : \"");
-		out.print(authToken.validForNoSeconds());
-		out.println("\",");
-		out.println("\"actionLinks\" : {");
-		out.println("\"delete\" : {");
-		out.println("\"requestMethod\" : \"DELETE\",");
-		out.println("\"rel\" : \"delete\",");
-		out.print("\"url\" : \"" + Encode.forJavaScript(url + authToken.tokenId()));
-		out.println("\"");
-		out.println("}");
-		out.println("}");
-		out.println("};");
-		out.println("if(null!=window.opener){");
-		out.println(
-				"window.opener.postMessage(authInfo, \""
-						+ Encode.forJavaScript(
-								IdpLoginInstanceProvider.getInitInfo().get("mainSystemDomain"))
-						+ "\");");
-		out.println("window.opener.focus();");
-		out.println("window.close();");
-		out.println("}");
-		out.println("}");
-		out.println("</script>");
-		out.println("<body>");
-		out.println("token: " + Encode.forHtml(authToken.token()));
-		out.println("</body></html>");
+			String url, PrintWriter out, String firstName, String lastName) {
+
+		String idInUserStorageEscaped = Encode.forJavaScript(authToken.idInUserStorage());
+		String tokenEscaped = Encode.forJavaScript(authToken.token());
+		String loginIdEscaped = Encode.forJavaScript(authToken.loginId());
+		String loginUrlEscaped = Encode.forJavaScript(url + authToken.tokenId());
+		String firstNameEscaped = Encode.forJavaScript(firstName);
+		String lastNameEscaped = Encode.forJavaScript(lastName);
+		String mainSystemDomainEscaped = Encode
+				.forJavaScript(IdpLoginInstanceProvider.getInitInfo().get("mainSystemDomain"));
+		String tokenForHtml = Encode.forHtml(authToken.token());
+		String outBlock = """
+				<!DOCTYPE html>
+				<html>
+					<head>
+						<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
+						<script type="text/javascript">
+							window.onload = start;
+							function start() {
+								var authentication = {
+									"authentication" : {
+										"data" : {
+											"children" : [
+												{"name" : "token", "value" : "%s"},
+												{"name" : "validUntil", "value" : "%s"},
+												{"name" : "renewUntil", "value" : "%s"},
+												{"name" : "userId", "value" : "%s"},
+												{"name" : "loginId", "value" : "%s"},
+												{"name" : "firstName", "value" : "%s"},
+												{"name" : "lastName", "value" : "%s"}
+											],
+											"name" : "authToken"
+										},
+										"actionLinks" : {
+											"renew" : {
+												"requestMethod" : "POST",
+												"rel" : "renew",
+												"url" : "%s",
+												"accept": "application/vnd.uub.authentication+json"
+											},
+											"delete" : {
+												"requestMethod" : "DELETE",
+												"rel" : "delete",
+												"url" : "%s"
+											}
+										}
+									}
+								};
+								if(null!=window.opener){
+									window.opener.postMessage(authentication, "%s");
+									window.opener.focus();
+									window.close();
+								}
+							};
+						</script>
+					</head>
+					<body>
+						token: %s
+					</body>
+				</html>
+				""".formatted(tokenEscaped, authToken.validUntil(), authToken.renewUntil(),
+				idInUserStorageEscaped, loginIdEscaped, firstNameEscaped, lastNameEscaped,
+				loginUrlEscaped, loginUrlEscaped, mainSystemDomainEscaped, tokenForHtml);
+		out.print(outBlock);
 	}
 
 	private AuthToken getNewAuthTokenFromGatekeeper(UserInfo userInfo) {

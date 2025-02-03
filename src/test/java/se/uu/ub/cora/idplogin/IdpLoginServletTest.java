@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, 2018, 2021 Uppsala University Library
+ * Copyright 2017, 2018, 2021, 2025 Uppsala University Library
  *
  * This file is part of Cora.
  *
@@ -22,12 +22,13 @@ package se.uu.ub.cora.idplogin;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
-import java.util.StringJoiner;
 
-import org.owasp.encoder.Encode;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import jakarta.servlet.http.HttpServlet;
@@ -41,8 +42,8 @@ public class IdpLoginServletTest {
 	private IdpLoginServlet loginServlet;
 	private RequestSpy requestSpy;
 	private ResponseSpy responseSpy;
-	private String authToken;
-	private String validForNoSeconds;
+	private String validUntil;
+	private String renewUntil;
 	private Map<String, String> initInfo = new HashMap<>();
 
 	@BeforeMethod
@@ -55,9 +56,12 @@ public class IdpLoginServletTest {
 		loginServlet = new IdpLoginServlet();
 		requestSpy = new RequestSpy();
 		responseSpy = new ResponseSpy();
+		requestSpy.headers.put("eppn", "test@testing.org");
+		requestSpy.headers.put("sn", "some'LastName");
+		requestSpy.headers.put("givenName", "some'FirstName");
 
-		authToken = "someAuth'Token";
-		validForNoSeconds = "278";
+		validUntil = "100";
+		renewUntil = "200";
 	}
 
 	@Test
@@ -67,97 +71,106 @@ public class IdpLoginServletTest {
 
 	@Test
 	public void testDoGetEppnSentOnToGateKeeper() throws Exception {
-		requestSpy.headers.put("eppn", "test@testing.org");
-
 		loginServlet.doGet(requestSpy, responseSpy);
 
 		UserInfo userInfo = gatekeeperTokenProvider.userInfos.get(0);
 		assertEquals(userInfo.loginId, "test@testing.org");
 	}
 
-	@Test
-	public void testGetCreatesCorrectHtmlAnswerOverHttps() throws Exception {
-		requestSpy.headers.put("X-Forwarded-Proto", "https");
-		requestSpy.headers.put("eppn", "test@testing.org");
-		loginServlet.doGet(requestSpy, responseSpy);
-
-		String expectedHtml = createExpectedHtml(authToken, validForNoSeconds);
-		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
+	@DataProvider(name = "protocolType")
+	public Iterator<String> testCasesForProtcols() {
+		return Arrays.asList("https", "http", "").iterator();
 	}
 
-	@Test
-	public void testGetCreatesCorrectHtmlAnswerOverHttpForEmptyHeader() throws Exception {
-		requestSpy.headers.put("X-Forwarded-Proto", "");
-		requestSpy.headers.put("eppn", "test@testing.org");
+	@Test(dataProvider = "protocolType")
+	public void testGetCreatesCorrectHtmlAnswerOverParameterizedProtocolTypeHeader(String protocol)
+			throws Exception {
+		requestSpy.headers.put("X-Forwarded-Proto", protocol);
 		loginServlet.doGet(requestSpy, responseSpy);
 
-		String expectedHtml = createExpectedHtml(authToken, validForNoSeconds);
+		String expectedHtml = createExpectedHtml(validUntil, renewUntil);
 		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
 	}
 
 	@Test
 	public void testGetCreatesCorrectHtmlAnswerOverHttpForMissingHeader() throws Exception {
-		requestSpy.headers.put("eppn", "test@testing.org");
 		loginServlet.doGet(requestSpy, responseSpy);
 
-		String expectedHtml = createExpectedHtml(authToken, validForNoSeconds);
+		String expectedHtml = createExpectedHtml(validUntil, renewUntil);
 		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
 	}
 
-	@Test
-	public void testGetCreatesCorrectHtmlAnswer() throws Exception {
-		requestSpy.headers.put("eppn", "test@testing.org");
-		loginServlet.doGet(requestSpy, responseSpy);
+	private String createExpectedHtml(String validUntil, String renewUntil) {
+		String userIdEscaped = "someIdInUser\\x27Storage";
+		String tokenEscaped = "someAuth\\x27Token";
+		String lastNameEscaped = "some\\x27LastName";
+		String firstNameEscaped = "some\\x27FirstName";
+		String loginIdEscaped = "loginId";
+		String actionUrlEscaped = "http:\\/\\/localhost:8080\\/login\\/rest\\/authToken\\/someTokenId";
+		String mainSystemDomainEscaped = "http:\\/\\/localhost:8080";
+		String tokenForHtml = "someAuth&#39;Token";
 
-		String expectedHtml = createExpectedHtml(authToken, validForNoSeconds);
-		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
-	}
-
-	private String createExpectedHtml(String authToken, String validForNoSeconds) {
-
-		StringJoiner html = new StringJoiner("\n");
-		html.add("<!DOCTYPE html>");
-		html.add("<html><head>");
-		html.add("<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>");
-		html.add("<script type=\"text/javascript\">");
-		html.add("window.onload = start;");
-		html.add("function start() {");
-		html.add("var authInfo = {");
-		html.add("\"userId\" : \"someIdInUser\\x27Storage\",");
-		html.add("\"token\" : \"" + Encode.forJavaScript(authToken) + "\",");
-		html.add("\"loginId\" : \"loginId\",");
-		html.add("\"validForNoSeconds\" : \"" + validForNoSeconds + "\",");
-		html.add("\"actionLinks\" : {");
-		html.add("\"delete\" : {");
-		html.add("\"requestMethod\" : \"DELETE\",");
-		html.add("\"rel\" : \"delete\",");
-		html.add(
-				"\"url\" : \"http:\\/\\/localhost:8080\\/login\\/rest\\/authToken\\/someTokenId\"");
-		html.add("}");
-		html.add("}");
-		html.add("};");
-		html.add("if(null!=window.opener){");
-		html.add("window.opener.postMessage(authInfo, \"http:\\/\\/localhost:8080\");");
-		html.add("window.opener.focus();");
-		html.add("window.close();");
-		html.add("}");
-		html.add("}");
-		html.add("</script>");
-		html.add("<body>");
-		html.add("token: " + Encode.forHtml(authToken));
-		html.add("</body></html>");
-		html.add("");
-		return html.toString();
+		return """
+				<!DOCTYPE html>
+				<html>
+					<head>
+						<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
+						<script type="text/javascript">
+							window.onload = start;
+							function start() {
+								var authentication = {
+									"authentication" : {
+										"data" : {
+											"children" : [
+												{"name" : "token", "value" : "%s"},
+												{"name" : "validUntil", "value" : "%s"},
+												{"name" : "renewUntil", "value" : "%s"},
+												{"name" : "userId", "value" : "%s"},
+												{"name" : "loginId", "value" : "%s"},
+												{"name" : "firstName", "value" : "%s"},
+												{"name" : "lastName", "value" : "%s"}
+											],
+											"name" : "authToken"
+										},
+										"actionLinks" : {
+											"renew" : {
+												"requestMethod" : "POST",
+												"rel" : "renew",
+												"url" : "%s",
+												"accept": "application/vnd.uub.authentication+json"
+											},
+											"delete" : {
+												"requestMethod" : "DELETE",
+												"rel" : "delete",
+												"url" : "%s"
+											}
+										}
+									}
+								};
+								if(null!=window.opener){
+									window.opener.postMessage(authentication, "%s");
+									window.opener.focus();
+									window.close();
+								}
+							};
+						</script>
+					</head>
+					<body>
+						token: %s
+					</body>
+				</html>
+				""".formatted(tokenEscaped, validUntil, renewUntil, userIdEscaped, loginIdEscaped,
+				firstNameEscaped, lastNameEscaped, actionUrlEscaped, actionUrlEscaped,
+				mainSystemDomainEscaped, tokenForHtml);
 	}
 
 	@Test(expectedExceptions = IdpLoginOnlySharingKnownInformationException.class, expectedExceptionsMessageRegExp = ""
 			+ "test@testing.org")
 	public void testGetWhenError() throws Exception {
-		requestSpy.headers.put("eppn", "test@testing.org");
 		responseSpy.throwIOExceptionOnGetWriter = true;
 		loginServlet.doGet(requestSpy, responseSpy);
 
-		String expectedHtml = createExpectedHtml(authToken, validForNoSeconds);
+		String expectedHtml = createExpectedHtml(validUntil, renewUntil);
 		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
 	}
 }
