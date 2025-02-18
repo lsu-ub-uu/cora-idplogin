@@ -25,13 +25,17 @@ import static org.testng.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import jakarta.servlet.http.HttpServlet;
+import se.uu.ub.cora.gatekeepertokenprovider.AuthToken;
 import se.uu.ub.cora.gatekeepertokenprovider.UserInfo;
 import se.uu.ub.cora.idplogin.initialize.IdpLoginInstanceProvider;
 import se.uu.ub.cora.idplogin.json.IdpLoginOnlySharingKnownInformationException;
@@ -73,7 +77,9 @@ public class IdpLoginServletTest {
 	public void testDoGetEppnSentOnToGateKeeper() throws Exception {
 		loginServlet.doGet(requestSpy, responseSpy);
 
-		UserInfo userInfo = gatekeeperTokenProvider.userInfos.get(0);
+		UserInfo userInfo = (UserInfo) gatekeeperTokenProvider.MCR
+				.getParameterForMethodAndCallNumberAndParameter("getAuthTokenForUserInfo", 0,
+						"userInfo");
 		assertEquals(userInfo.loginId, "test@testing.org");
 	}
 
@@ -88,7 +94,7 @@ public class IdpLoginServletTest {
 		requestSpy.headers.put("X-Forwarded-Proto", protocol);
 		loginServlet.doGet(requestSpy, responseSpy);
 
-		String expectedHtml = createExpectedHtml(validUntil, renewUntil);
+		String expectedHtml = createExpectedHtmlWithoutPermissionUnits(validUntil, renewUntil);
 		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
 	}
 
@@ -96,11 +102,11 @@ public class IdpLoginServletTest {
 	public void testGetCreatesCorrectHtmlAnswerOverHttpForMissingHeader() throws Exception {
 		loginServlet.doGet(requestSpy, responseSpy);
 
-		String expectedHtml = createExpectedHtml(validUntil, renewUntil);
+		String expectedHtml = createExpectedHtmlWithoutPermissionUnits(validUntil, renewUntil);
 		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
 	}
 
-	private String createExpectedHtml(String validUntil, String renewUntil) {
+	private String createExpectedHtmlWithoutPermissionUnits(String validUntil, String renewUntil) {
 		String userIdEscaped = "someIdInUser\\x27Storage";
 		String tokenEscaped = "someAuth\\x27Token";
 		String lastNameEscaped = "some\\x27LastName";
@@ -164,13 +170,111 @@ public class IdpLoginServletTest {
 				mainSystemDomainEscaped, tokenForHtml);
 	}
 
+	@Test
+	public void testGetCreatesCorrectHtmlAnswerOverHttpForMissingHeaderWithPermissionUnits()
+			throws Exception {
+		Set<String> permissionUnits = new LinkedHashSet<>();
+		permissionUnits.add("001");
+		permissionUnits.add("002");
+
+		gatekeeperTokenProvider.MRV.setDefaultReturnValuesSupplier("getAuthTokenForUserInfo",
+				() -> new AuthToken("someAuth'Token", "someTokenId", 100L, 200L,
+						"someIdInUser'Storage", "loginId", Optional.empty(), Optional.empty(),
+						permissionUnits));
+		loginServlet.doGet(requestSpy, responseSpy);
+
+		String expectedHtml = createExpectedHtmlTwoPermissionUnits(validUntil, renewUntil);
+		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
+	}
+
+	private String createExpectedHtmlTwoPermissionUnits(String validUntil, String renewUntil) {
+		String userIdEscaped = "someIdInUser\\x27Storage";
+		String tokenEscaped = "someAuth\\x27Token";
+		String lastNameEscaped = "some\\x27LastName";
+		String firstNameEscaped = "some\\x27FirstName";
+		String loginIdEscaped = "loginId";
+		String actionUrlEscaped = "http:\\/\\/localhost:8080\\/login\\/rest\\/authToken\\/someTokenId";
+		String mainSystemDomainEscaped = "http:\\/\\/localhost:8080";
+		String tokenForHtml = "someAuth&#39;Token";
+
+		return """
+				<!DOCTYPE html>
+				<html>
+					<head>
+						<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
+						<script type="text/javascript">
+							window.onload = start;
+							function start() {
+								var authentication = {
+									"authentication" : {
+										"data" : {
+											"children" : [
+												{"name" : "token", "value" : "%s"},
+												{"name" : "validUntil", "value" : "%s"},
+												{"name" : "renewUntil", "value" : "%s"},
+												{"name" : "userId", "value" : "%s"},
+												{"name" : "loginId", "value" : "%s"},
+												{"name" : "firstName", "value" : "%s"},
+												{"name" : "lastName", "value" : "%s"},
+												{
+													"repeatid" : "1",
+													"children" : [
+														{"name" : "linkedRecordType", "value" : "permissionUnit"},
+														{"name" : "linkedRecordId", "value" : "001"}
+													],
+													"name" : "permissionUnit"
+												},
+												{
+													"repeatid" : "2",
+													"children" : [
+														{"name" : "linkedRecordType", "value" : "permissionUnit"},
+														{"name" : "linkedRecordId", "value" : "002"}
+													],
+													"name" : "permissionUnit"
+												}
+											],
+											"name" : "authToken"
+										},
+										"actionLinks" : {
+											"renew" : {
+												"requestMethod" : "POST",
+												"rel" : "renew",
+												"url" : "%s",
+												"accept": "application/vnd.uub.authentication+json"
+											},
+											"delete" : {
+												"requestMethod" : "DELETE",
+												"rel" : "delete",
+												"url" : "%s"
+											}
+										}
+									}
+								};
+								if(null!=window.opener){
+									window.opener.postMessage(authentication, "%s");
+									window.opener.focus();
+									window.close();
+								}
+							};
+						</script>
+					</head>
+					<body>
+						token: %s
+					</body>
+				</html>
+				"""
+				.formatted(tokenEscaped, validUntil, renewUntil, userIdEscaped, loginIdEscaped,
+						firstNameEscaped, lastNameEscaped, actionUrlEscaped, actionUrlEscaped,
+						mainSystemDomainEscaped, tokenForHtml);
+	}
+
 	@Test(expectedExceptions = IdpLoginOnlySharingKnownInformationException.class, expectedExceptionsMessageRegExp = ""
 			+ "test@testing.org")
 	public void testGetWhenError() throws Exception {
 		responseSpy.throwIOExceptionOnGetWriter = true;
 		loginServlet.doGet(requestSpy, responseSpy);
 
-		String expectedHtml = createExpectedHtml(validUntil, renewUntil);
+		String expectedHtml = createExpectedHtmlWithoutPermissionUnits(validUntil, renewUntil);
 		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
 	}
 }

@@ -75,6 +75,7 @@ public class IdpLoginServlet extends HttpServlet {
 		String mainSystemDomainEscaped = Encode
 				.forJavaScript(IdpLoginInstanceProvider.getInitInfo().get("mainSystemDomain"));
 		String tokenForHtml = Encode.forHtml(authToken.token());
+		String permissionUnits = calculatePermissionUnits(authToken);
 		String outBlock = """
 				<!DOCTYPE html>
 				<html>
@@ -93,7 +94,7 @@ public class IdpLoginServlet extends HttpServlet {
 												{"name" : "userId", "value" : "%s"},
 												{"name" : "loginId", "value" : "%s"},
 												{"name" : "firstName", "value" : "%s"},
-												{"name" : "lastName", "value" : "%s"}
+												{"name" : "lastName", "value" : "%s"}%s
 											],
 											"name" : "authToken"
 										},
@@ -126,8 +127,47 @@ public class IdpLoginServlet extends HttpServlet {
 				</html>
 				""".formatted(tokenEscaped, authToken.validUntil(), authToken.renewUntil(),
 				idInUserStorageEscaped, loginIdEscaped, firstNameEscaped, lastNameEscaped,
-				loginUrlEscaped, loginUrlEscaped, mainSystemDomainEscaped, tokenForHtml);
+				permissionUnits, loginUrlEscaped, loginUrlEscaped, mainSystemDomainEscaped,
+				tokenForHtml);
 		out.print(outBlock);
+	}
+
+	private String calculatePermissionUnits(AuthToken authToken) {
+		if (authToken.permissionUnits().isEmpty()) {
+			return "";
+		}
+		return createPermissionUnitLinksFromAuthToken(authToken);
+	}
+
+	private String createPermissionUnitLinksFromAuthToken(AuthToken authToken) {
+		StringBuilder permissionUnits = new StringBuilder();
+		int repeatId = 0;
+		for (String permissionUnit : authToken.permissionUnits()) {
+			repeatId++;
+			permissionUnits.append(permissionUnitLink2(repeatId, permissionUnit));
+		}
+		return permissionUnits.toString();
+	}
+
+	private String permissionUnitLink2(int repeatId, String permissionUnit) {
+		String link = """
+				,
+				{
+					"repeatid" : "%d",
+					"children" : [
+						{"name" : "linkedRecordType", "value" : "permissionUnit"},
+						{"name" : "linkedRecordId", "value" : "%s"}
+					],
+					"name" : "permissionUnit"
+				}""".formatted(repeatId, permissionUnit);
+		return indentTextBlock(link);
+	}
+
+	private String indentTextBlock(String textBlock) {
+		int numberOfTabsToInsert = 8;
+		String tabs = "\t".repeat(numberOfTabsToInsert);
+		String result = textBlock.replaceAll("(?m)^", tabs);
+		return result.replaceFirst(tabs, "");
 	}
 
 	private AuthToken getNewAuthTokenFromGatekeeper(UserInfo userInfo) {

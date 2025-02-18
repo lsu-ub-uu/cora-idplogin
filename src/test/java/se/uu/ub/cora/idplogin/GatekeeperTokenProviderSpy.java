@@ -19,35 +19,40 @@
 
 package se.uu.ub.cora.idplogin;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
 import java.util.Optional;
 
 import se.uu.ub.cora.gatekeepertokenprovider.AuthToken;
 import se.uu.ub.cora.gatekeepertokenprovider.GatekeeperTokenProvider;
 import se.uu.ub.cora.gatekeepertokenprovider.UserInfo;
+import se.uu.ub.cora.testutils.mcr.MethodCallRecorder;
+import se.uu.ub.cora.testutils.mrv.MethodReturnValues;
 
 public class GatekeeperTokenProviderSpy implements GatekeeperTokenProvider {
+	public MethodCallRecorder MCR = new MethodCallRecorder();
+	public MethodReturnValues MRV = new MethodReturnValues();
 
-	public List<UserInfo> userInfos = new ArrayList<>();
-	public List<String> deletedUserInfos = new ArrayList<>();
+	public GatekeeperTokenProviderSpy() {
+		MCR.useMRV(MRV);
+		MRV.setDefaultReturnValuesSupplier("getAuthTokenForUserInfo",
+				() -> new AuthToken("someAuth'Token", "someTokenId", 100L, 200L,
+						"someIdInUser'Storage", "loginId", Optional.empty(), Optional.empty(),
+						Collections.emptySet()));
+	}
 
 	@Override
 	public AuthToken getAuthTokenForUserInfo(UserInfo userInfo) {
-		userInfos.add(userInfo);
-		return new AuthToken("someAuth'Token", "someTokenId", 100L, 200L, "someIdInUser'Storage",
-				"loginId", Optional.empty(), Optional.empty());
+		return (AuthToken) MCR.addCallAndReturnFromMRV("userInfo", userInfo);
 	}
 
 	@Override
 	public void removeAuthToken(String tokenId, String authToken) {
-		deletedUserInfos.add(tokenId);
-
+		MCR.addCall("tokenId", tokenId, "authToken", authToken);
 	}
 
 	@Override
 	public AuthToken renewAuthToken(String tokenId, String token) {
-		return null;
+		return (AuthToken) MCR.addCallAndReturnFromMRV("tokenId", tokenId, "token", token);
 	}
 
 }
