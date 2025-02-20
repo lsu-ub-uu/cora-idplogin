@@ -153,7 +153,7 @@ public class IdpLoginServlet extends HttpServlet {
 		String link = """
 				,
 				{
-					"repeatid" : "%d",
+					"repeatId" : "%d",
 					"children" : [
 						{"name" : "linkedRecordType", "value" : "permissionUnit"},
 						{"name" : "linkedRecordId", "value" : "%s"}

@@ -217,7 +217,7 @@ public class IdpLoginServletTest {
 												{"name" : "firstName", "value" : "%s"},
 												{"name" : "lastName", "value" : "%s"},
 												{
-													"repeatid" : "1",
+													"repeatId" : "1",
 													"children" : [
 														{"name" : "linkedRecordType", "value" : "permissionUnit"},
 														{"name" : "linkedRecordId", "value" : "001"}
@@ -225,7 +225,7 @@ public class IdpLoginServletTest {
 													"name" : "permissionUnit"
 												},
 												{
-													"repeatid" : "2",
+													"repeatId" : "2",
 													"children" : [
 														{"name" : "linkedRecordType", "value" : "permissionUnit"},
 														{"name" : "linkedRecordId", "value" : "002"}
