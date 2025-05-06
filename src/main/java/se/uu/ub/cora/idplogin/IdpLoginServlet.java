@@ -103,7 +103,7 @@ public class IdpLoginServlet extends HttpServlet {
 												"requestMethod" : "POST",
 												"rel" : "renew",
 												"url" : "%s",
-												"accept": "application/vnd.uub.authentication+json"
+												"accept": "application/vnd.cora.authentication+json"
 											},
 											"delete" : {
 												"requestMethod" : "DELETE",
