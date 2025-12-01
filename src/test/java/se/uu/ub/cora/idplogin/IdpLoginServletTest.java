@@ -30,6 +30,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -39,6 +41,7 @@ import se.uu.ub.cora.gatekeepertokenprovider.AuthToken;
 import se.uu.ub.cora.gatekeepertokenprovider.UserInfo;
 import se.uu.ub.cora.idplogin.initialize.IdpLoginInstanceProvider;
 import se.uu.ub.cora.idplogin.json.IdpLoginOnlySharingKnownInformationException;
+import se.uu.ub.cora.login.json.AuthTokenToJsonConverterProvider;
 
 public class IdpLoginServletTest {
 
@@ -49,10 +52,14 @@ public class IdpLoginServletTest {
 	private String validUntil;
 	private String renewUntil;
 	private Map<String, String> initInfo = new HashMap<>();
+	private AuthTokenToJsonConverterSpy converterSpy;
 
 	@BeforeMethod
 	public void setup() {
 		gatekeeperTokenProvider = new GatekeeperTokenProviderSpy();
+		converterSpy = new AuthTokenToJsonConverterSpy();
+		AuthTokenToJsonConverterProvider.onlyForTestSetConverterSupplier(() -> converterSpy);
+
 		initInfo.put("mainSystemDomain", "http://localhost:8080");
 		initInfo.put("tokenLogoutURL", "http://localhost:8080/login/rest/authToken/");
 		IdpLoginInstanceProvider.setInitInfo(initInfo);
@@ -66,6 +73,11 @@ public class IdpLoginServletTest {
 
 		validUntil = "100";
 		renewUntil = "200";
+	}
+
+	@AfterMethod
+	public void afterMethod() {
+		AuthTokenToJsonConverterProvider.resetSupplier();
 	}
 
 	@Test
@@ -94,28 +106,24 @@ public class IdpLoginServletTest {
 		requestSpy.headers.put("X-Forwarded-Proto", protocol);
 		loginServlet.doGet(requestSpy, responseSpy);
 
-		String expectedHtml = createExpectedHtmlWithoutPermissionUnits(validUntil, renewUntil);
+		String expectedHtml = createExpectedHtmlWithoutPermissionUnits();
 		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
+
+		converterSpy.MCR.assertCalledParameters("convertAuthTokenToJson", null);
+		Assert.fail();
 	}
 
 	@Test
 	public void testGetCreatesCorrectHtmlAnswerOverHttpForMissingHeader() throws Exception {
 		loginServlet.doGet(requestSpy, responseSpy);
 
-		String expectedHtml = createExpectedHtmlWithoutPermissionUnits(validUntil, renewUntil);
+		String expectedHtml = createExpectedHtmlWithoutPermissionUnits();
 		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
 	}
 
-	private String createExpectedHtmlWithoutPermissionUnits(String validUntil, String renewUntil) {
-		String userIdEscaped = "someIdInUser\\x27Storage";
-		String tokenEscaped = "someAuth\\x27Token";
-		String lastNameEscaped = "some\\x27LastName";
-		String firstNameEscaped = "some\\x27FirstName";
-		String loginIdEscaped = "loginId";
-		String actionUrlEscaped = "http:\\/\\/localhost:8080\\/login\\/rest\\/authToken\\/someTokenId";
+	private String createExpectedHtmlWithoutPermissionUnits() {
 		String mainSystemDomainEscaped = "http:\\/\\/localhost:8080";
 		String tokenForHtml = "someAuth&#39;Token";
-
 		return """
 				<!DOCTYPE html>
 				<html>
@@ -124,35 +132,7 @@ public class IdpLoginServletTest {
 						<script type="text/javascript">
 							window.onload = start;
 							function start() {
-								var authentication = {
-									"authentication" : {
-										"data" : {
-											"children" : [
-												{"name" : "token", "value" : "%s"},
-												{"name" : "validUntil", "value" : "%s"},
-												{"name" : "renewUntil", "value" : "%s"},
-												{"name" : "userId", "value" : "%s"},
-												{"name" : "loginId", "value" : "%s"},
-												{"name" : "firstName", "value" : "%s"},
-												{"name" : "lastName", "value" : "%s"}
-											],
-											"name" : "authToken"
-										},
-										"actionLinks" : {
-											"renew" : {
-												"requestMethod" : "POST",
-												"rel" : "renew",
-												"url" : "%s",
-												"accept": "application/vnd.cora.authentication+json"
-											},
-											"delete" : {
-												"requestMethod" : "DELETE",
-												"rel" : "delete",
-												"url" : "%s"
-											}
-										}
-									}
-								};
+								var authentication = fake json \\x27authtoken\\x27 from AuthTokenToJsonConverterSpy;
 								if(null!=window.opener){
 									window.opener.postMessage(authentication, "%s");
 									window.opener.focus();
@@ -165,9 +145,8 @@ public class IdpLoginServletTest {
 						token: %s
 					</body>
 				</html>
-				""".formatted(tokenEscaped, validUntil, renewUntil, userIdEscaped, loginIdEscaped,
-				firstNameEscaped, lastNameEscaped, actionUrlEscaped, actionUrlEscaped,
-				mainSystemDomainEscaped, tokenForHtml);
+				"""
+				.formatted(mainSystemDomainEscaped, tokenForHtml);
 	}
 
 	@Test
@@ -274,7 +253,7 @@ public class IdpLoginServletTest {
 		responseSpy.throwIOExceptionOnGetWriter = true;
 		loginServlet.doGet(requestSpy, responseSpy);
 
-		String expectedHtml = createExpectedHtmlWithoutPermissionUnits(validUntil, renewUntil);
+		String expectedHtml = createExpectedHtmlWithoutPermissionUnits();
 		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
 	}
 }

@@ -32,6 +32,8 @@ import se.uu.ub.cora.gatekeepertokenprovider.GatekeeperTokenProvider;
 import se.uu.ub.cora.gatekeepertokenprovider.UserInfo;
 import se.uu.ub.cora.idplogin.initialize.IdpLoginInstanceProvider;
 import se.uu.ub.cora.idplogin.json.IdpLoginOnlySharingKnownInformationException;
+import se.uu.ub.cora.login.json.AuthTokenToJsonConverter;
+import se.uu.ub.cora.login.json.AuthTokenToJsonConverterProvider;
 
 public class IdpLoginServlet extends HttpServlet {
 
@@ -58,12 +60,12 @@ public class IdpLoginServlet extends HttpServlet {
 		try (PrintWriter out = response.getWriter();) {
 			createAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrl(authTokenFromGatekeeper, url,
 					out, firstName, lastName);
-		} catch (IOException e) {
+		} catch (IOException _) {
 			throw IdpLoginOnlySharingKnownInformationException.forUserId(userIdFromIdp);
 		}
 	}
 
-	private void createAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrl(AuthToken authToken,
+	private void createAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrlOLD(AuthToken authToken,
 			String url, PrintWriter out, String firstName, String lastName) {
 
 		String idInUserStorageEscaped = Encode.forJavaScript(authToken.idInUserStorage());
@@ -129,6 +131,48 @@ public class IdpLoginServlet extends HttpServlet {
 				idInUserStorageEscaped, loginIdEscaped, firstNameEscaped, lastNameEscaped,
 				permissionUnits, loginUrlEscaped, loginUrlEscaped, mainSystemDomainEscaped,
 				tokenForHtml);
+		out.print(outBlock);
+	}
+
+	private void createAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrl(AuthToken authToken,
+			String url, PrintWriter out, String firstName, String lastName) {
+
+		String idInUserStorageEscaped = Encode.forJavaScript(authToken.idInUserStorage());
+		String tokenEscaped = Encode.forJavaScript(authToken.token());
+		String loginIdEscaped = Encode.forJavaScript(authToken.loginId());
+		String loginUrlEscaped = Encode.forJavaScript(url + authToken.tokenId());
+		String firstNameEscaped = Encode.forJavaScript(firstName);
+		String lastNameEscaped = Encode.forJavaScript(lastName);
+		String mainSystemDomainEscaped = Encode
+				.forJavaScript(IdpLoginInstanceProvider.getInitInfo().get("mainSystemDomain"));
+		String tokenForHtml = Encode.forHtml(authToken.token());
+		String permissionUnits = calculatePermissionUnits(authToken);
+		// AuthTokenToJsonConverter converter = new AuthTokenToJsonConverterImp();
+		AuthTokenToJsonConverter converter = AuthTokenToJsonConverterProvider.getConverter();
+		String jsonAuthToken = converter.convertAuthTokenToJson(authToken, url);
+		String jsonAuthTokenEscaped = Encode.forJavaScript(jsonAuthToken);
+		String outBlock = """
+				<!DOCTYPE html>
+				<html>
+					<head>
+						<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
+						<script type="text/javascript">
+							window.onload = start;
+							function start() {
+								var authentication = %s;
+								if(null!=window.opener){
+									window.opener.postMessage(authentication, "%s");
+									window.opener.focus();
+									window.close();
+								}
+							};
+						</script>
+					</head>
+					<body>
+						token: %s
+					</body>
+				</html>
+				""".formatted(jsonAuthTokenEscaped, mainSystemDomainEscaped, tokenForHtml);
 		out.print(outBlock);
 	}
 
