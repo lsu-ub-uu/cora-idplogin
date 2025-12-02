@@ -50,13 +50,13 @@ public class IdpLoginServletTest {
 	private RequestSpy requestSpy;
 	private ResponseSpy responseSpy;
 	private Map<String, String> initInfo = new HashMap<>();
-	private AuthTokenToJsonConverterSpy converterSpy;
+	private AuthTokenToJsonConverterSpy tokenConverterSpy;
+	private AuthToken authToken;
 
 	@BeforeMethod
 	public void setup() {
-		gatekeeperTokenProvider = new GatekeeperTokenProviderSpy();
-		converterSpy = new AuthTokenToJsonConverterSpy();
-		AuthTokenToJsonConverterProvider.onlyForTestSetConverterSupplier(() -> converterSpy);
+		setupGatekeeperTokenProviderSpy();
+		setupAuthTokenConverterSpy();
 
 		initInfo.put("mainSystemDomain", MAIN_SYSTEM_DOMAIN);
 		initInfo.put("tokenLogoutURL", TOKEN_LOGOUT_URL);
@@ -68,6 +68,23 @@ public class IdpLoginServletTest {
 		requestSpy.headers.put("eppn", "test@testing.org");
 		requestSpy.headers.put("sn", "some'LastName");
 		requestSpy.headers.put("givenName", "some'FirstName");
+	}
+
+	private void setupGatekeeperTokenProviderSpy() {
+		gatekeeperTokenProvider = new GatekeeperTokenProviderSpy();
+		Set<String> permissionUnits = new LinkedHashSet<>();
+		permissionUnits.add("001");
+		permissionUnits.add("002");
+		authToken = new AuthToken("someAuth'Token", "someTokenId", 100L, 200L,
+				"someIdInUser'Storage", "loginId", Optional.empty(), Optional.empty(),
+				permissionUnits);
+		gatekeeperTokenProvider.MRV.setDefaultReturnValuesSupplier("getAuthTokenForUserInfo",
+				() -> authToken);
+	}
+
+	private void setupAuthTokenConverterSpy() {
+		tokenConverterSpy = new AuthTokenToJsonConverterSpy();
+		AuthTokenToJsonConverterProvider.onlyForTestSetConverterSupplier(() -> tokenConverterSpy);
 	}
 
 	@AfterMethod
@@ -98,21 +115,14 @@ public class IdpLoginServletTest {
 	@Test(dataProvider = "protocolType")
 	public void testGetCreatesCorrectHtmlAnswerOverParameterizedProtocolTypeHeader(String protocol)
 			throws Exception {
-		Set<String> permissionUnits = new LinkedHashSet<>();
-		permissionUnits.add("001");
-		permissionUnits.add("002");
-		AuthToken authToken = new AuthToken("someAuth'Token", "someTokenId", 100L, 200L,
-				"someIdInUser'Storage", "loginId", Optional.empty(), Optional.empty(),
-				permissionUnits);
-		gatekeeperTokenProvider.MRV.setDefaultReturnValuesSupplier("getAuthTokenForUserInfo",
-				() -> authToken);
+
 		requestSpy.headers.put("X-Forwarded-Proto", protocol);
 		loginServlet.doGet(requestSpy, responseSpy);
 
 		String expectedHtml = createExpectedHtmlWithAuthenticationFromSpy();
 		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
 
-		converterSpy.MCR.assertCalledParameters("convertAuthTokenToJson", authToken,
+		tokenConverterSpy.MCR.assertCalledParameters("convertAuthTokenToJson", authToken,
 				TOKEN_LOGOUT_URL);
 	}
 
