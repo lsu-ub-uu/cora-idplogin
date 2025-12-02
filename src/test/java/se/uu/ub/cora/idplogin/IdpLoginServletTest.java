@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -44,13 +43,12 @@ import se.uu.ub.cora.idplogin.json.IdpLoginOnlySharingKnownInformationException;
 import se.uu.ub.cora.login.json.AuthTokenToJsonConverterProvider;
 
 public class IdpLoginServletTest {
-
+	private static final String MAIN_SYSTEM_DOMAIN = "http://localhost:8080";
+	private static final String TOKEN_LOGOUT_URL = "http://localhost:8080/login/rest/authToken/";
 	private GatekeeperTokenProviderSpy gatekeeperTokenProvider;
 	private IdpLoginServlet loginServlet;
 	private RequestSpy requestSpy;
 	private ResponseSpy responseSpy;
-	private String validUntil;
-	private String renewUntil;
 	private Map<String, String> initInfo = new HashMap<>();
 	private AuthTokenToJsonConverterSpy converterSpy;
 
@@ -60,8 +58,8 @@ public class IdpLoginServletTest {
 		converterSpy = new AuthTokenToJsonConverterSpy();
 		AuthTokenToJsonConverterProvider.onlyForTestSetConverterSupplier(() -> converterSpy);
 
-		initInfo.put("mainSystemDomain", "http://localhost:8080");
-		initInfo.put("tokenLogoutURL", "http://localhost:8080/login/rest/authToken/");
+		initInfo.put("mainSystemDomain", MAIN_SYSTEM_DOMAIN);
+		initInfo.put("tokenLogoutURL", TOKEN_LOGOUT_URL);
 		IdpLoginInstanceProvider.setInitInfo(initInfo);
 		IdpLoginInstanceProvider.setGatekeeperTokenProvider(gatekeeperTokenProvider);
 		loginServlet = new IdpLoginServlet();
@@ -70,9 +68,6 @@ public class IdpLoginServletTest {
 		requestSpy.headers.put("eppn", "test@testing.org");
 		requestSpy.headers.put("sn", "some'LastName");
 		requestSpy.headers.put("givenName", "some'FirstName");
-
-		validUntil = "100";
-		renewUntil = "200";
 	}
 
 	@AfterMethod
@@ -103,25 +98,33 @@ public class IdpLoginServletTest {
 	@Test(dataProvider = "protocolType")
 	public void testGetCreatesCorrectHtmlAnswerOverParameterizedProtocolTypeHeader(String protocol)
 			throws Exception {
+		Set<String> permissionUnits = new LinkedHashSet<>();
+		permissionUnits.add("001");
+		permissionUnits.add("002");
+		AuthToken authToken = new AuthToken("someAuth'Token", "someTokenId", 100L, 200L,
+				"someIdInUser'Storage", "loginId", Optional.empty(), Optional.empty(),
+				permissionUnits);
+		gatekeeperTokenProvider.MRV.setDefaultReturnValuesSupplier("getAuthTokenForUserInfo",
+				() -> authToken);
 		requestSpy.headers.put("X-Forwarded-Proto", protocol);
 		loginServlet.doGet(requestSpy, responseSpy);
 
-		String expectedHtml = createExpectedHtmlWithoutPermissionUnits();
+		String expectedHtml = createExpectedHtmlWithAuthenticationFromSpy();
 		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
 
-		converterSpy.MCR.assertCalledParameters("convertAuthTokenToJson", null);
-		Assert.fail();
+		converterSpy.MCR.assertCalledParameters("convertAuthTokenToJson", authToken,
+				TOKEN_LOGOUT_URL);
 	}
 
 	@Test
 	public void testGetCreatesCorrectHtmlAnswerOverHttpForMissingHeader() throws Exception {
 		loginServlet.doGet(requestSpy, responseSpy);
 
-		String expectedHtml = createExpectedHtmlWithoutPermissionUnits();
+		String expectedHtml = createExpectedHtmlWithAuthenticationFromSpy();
 		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
 	}
 
-	private String createExpectedHtmlWithoutPermissionUnits() {
+	private String createExpectedHtmlWithAuthenticationFromSpy() {
 		String mainSystemDomainEscaped = "http:\\/\\/localhost:8080";
 		String tokenForHtml = "someAuth&#39;Token";
 		return """
@@ -162,89 +165,8 @@ public class IdpLoginServletTest {
 						permissionUnits));
 		loginServlet.doGet(requestSpy, responseSpy);
 
-		String expectedHtml = createExpectedHtmlTwoPermissionUnits(validUntil, renewUntil);
+		String expectedHtml = createExpectedHtmlWithAuthenticationFromSpy();
 		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
-	}
-
-	private String createExpectedHtmlTwoPermissionUnits(String validUntil, String renewUntil) {
-		String userIdEscaped = "someIdInUser\\x27Storage";
-		String tokenEscaped = "someAuth\\x27Token";
-		String lastNameEscaped = "some\\x27LastName";
-		String firstNameEscaped = "some\\x27FirstName";
-		String loginIdEscaped = "loginId";
-		String actionUrlEscaped = "http:\\/\\/localhost:8080\\/login\\/rest\\/authToken\\/someTokenId";
-		String mainSystemDomainEscaped = "http:\\/\\/localhost:8080";
-		String tokenForHtml = "someAuth&#39;Token";
-
-		return """
-				<!DOCTYPE html>
-				<html>
-					<head>
-						<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
-						<script type="text/javascript">
-							window.onload = start;
-							function start() {
-								var authentication = {
-									"authentication" : {
-										"data" : {
-											"children" : [
-												{"name" : "token", "value" : "%s"},
-												{"name" : "validUntil", "value" : "%s"},
-												{"name" : "renewUntil", "value" : "%s"},
-												{"name" : "userId", "value" : "%s"},
-												{"name" : "loginId", "value" : "%s"},
-												{"name" : "firstName", "value" : "%s"},
-												{"name" : "lastName", "value" : "%s"},
-												{
-													"repeatId" : "1",
-													"children" : [
-														{"name" : "linkedRecordType", "value" : "permissionUnit"},
-														{"name" : "linkedRecordId", "value" : "001"}
-													],
-													"name" : "permissionUnit"
-												},
-												{
-													"repeatId" : "2",
-													"children" : [
-														{"name" : "linkedRecordType", "value" : "permissionUnit"},
-														{"name" : "linkedRecordId", "value" : "002"}
-													],
-													"name" : "permissionUnit"
-												}
-											],
-											"name" : "authToken"
-										},
-										"actionLinks" : {
-											"renew" : {
-												"requestMethod" : "POST",
-												"rel" : "renew",
-												"url" : "%s",
-												"accept": "application/vnd.cora.authentication+json"
-											},
-											"delete" : {
-												"requestMethod" : "DELETE",
-												"rel" : "delete",
-												"url" : "%s"
-											}
-										}
-									}
-								};
-								if(null!=window.opener){
-									window.opener.postMessage(authentication, "%s");
-									window.opener.focus();
-									window.close();
-								}
-							};
-						</script>
-					</head>
-					<body>
-						token: %s
-					</body>
-				</html>
-				"""
-				.formatted(tokenEscaped, validUntil, renewUntil, userIdEscaped, loginIdEscaped,
-						firstNameEscaped, lastNameEscaped, actionUrlEscaped, actionUrlEscaped,
-						mainSystemDomainEscaped, tokenForHtml);
 	}
 
 	@Test(expectedExceptions = IdpLoginOnlySharingKnownInformationException.class, expectedExceptionsMessageRegExp = ""
@@ -253,7 +175,7 @@ public class IdpLoginServletTest {
 		responseSpy.throwIOExceptionOnGetWriter = true;
 		loginServlet.doGet(requestSpy, responseSpy);
 
-		String expectedHtml = createExpectedHtmlWithoutPermissionUnits();
+		String expectedHtml = createExpectedHtmlWithAuthenticationFromSpy();
 		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
 	}
 }

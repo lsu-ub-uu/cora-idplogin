@@ -43,111 +43,36 @@ public class IdpLoginServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		String userIdFromIdp = request.getHeader("eppn");
-		String lastName = request.getHeader("sn");
-		String firstName = request.getHeader("givenName");
+		// the following two lines are left for now if we need the info when creating logins for
+		// users that are not stored in the system prior to logging in
+		// String lastName = request.getHeader("sn");
+		// String firstName = request.getHeader("givenName");
 		UserInfo userInfo = UserInfo.withLoginId(userIdFromIdp);
 		AuthToken authTokenFromGatekeeper = getNewAuthTokenFromGatekeeper(userInfo);
 
 		String url = IdpLoginInstanceProvider.getInitInfo().get("tokenLogoutURL");
 
 		tryToCreateAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrlAndUserId(response,
-				authTokenFromGatekeeper, url, userIdFromIdp, firstName, lastName);
+				authTokenFromGatekeeper, url, userIdFromIdp);
 	}
 
 	private void tryToCreateAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrlAndUserId(
 			HttpServletResponse response, AuthToken authTokenFromGatekeeper, String url,
-			String userIdFromIdp, String firstName, String lastName) {
+			String userIdFromIdp) {
 		try (PrintWriter out = response.getWriter();) {
 			createAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrl(authTokenFromGatekeeper, url,
-					out, firstName, lastName);
+					out);
 		} catch (IOException _) {
 			throw IdpLoginOnlySharingKnownInformationException.forUserId(userIdFromIdp);
 		}
 	}
 
-	private void createAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrlOLD(AuthToken authToken,
-			String url, PrintWriter out, String firstName, String lastName) {
-
-		String idInUserStorageEscaped = Encode.forJavaScript(authToken.idInUserStorage());
-		String tokenEscaped = Encode.forJavaScript(authToken.token());
-		String loginIdEscaped = Encode.forJavaScript(authToken.loginId());
-		String loginUrlEscaped = Encode.forJavaScript(url + authToken.tokenId());
-		String firstNameEscaped = Encode.forJavaScript(firstName);
-		String lastNameEscaped = Encode.forJavaScript(lastName);
-		String mainSystemDomainEscaped = Encode
-				.forJavaScript(IdpLoginInstanceProvider.getInitInfo().get("mainSystemDomain"));
-		String tokenForHtml = Encode.forHtml(authToken.token());
-		String permissionUnits = calculatePermissionUnits(authToken);
-		String outBlock = """
-				<!DOCTYPE html>
-				<html>
-					<head>
-						<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
-						<script type="text/javascript">
-							window.onload = start;
-							function start() {
-								var authentication = {
-									"authentication" : {
-										"data" : {
-											"children" : [
-												{"name" : "token", "value" : "%s"},
-												{"name" : "validUntil", "value" : "%s"},
-												{"name" : "renewUntil", "value" : "%s"},
-												{"name" : "userId", "value" : "%s"},
-												{"name" : "loginId", "value" : "%s"},
-												{"name" : "firstName", "value" : "%s"},
-												{"name" : "lastName", "value" : "%s"}%s
-											],
-											"name" : "authToken"
-										},
-										"actionLinks" : {
-											"renew" : {
-												"requestMethod" : "POST",
-												"rel" : "renew",
-												"url" : "%s",
-												"accept": "application/vnd.cora.authentication+json"
-											},
-											"delete" : {
-												"requestMethod" : "DELETE",
-												"rel" : "delete",
-												"url" : "%s"
-											}
-										}
-									}
-								};
-								if(null!=window.opener){
-									window.opener.postMessage(authentication, "%s");
-									window.opener.focus();
-									window.close();
-								}
-							};
-						</script>
-					</head>
-					<body>
-						token: %s
-					</body>
-				</html>
-				""".formatted(tokenEscaped, authToken.validUntil(), authToken.renewUntil(),
-				idInUserStorageEscaped, loginIdEscaped, firstNameEscaped, lastNameEscaped,
-				permissionUnits, loginUrlEscaped, loginUrlEscaped, mainSystemDomainEscaped,
-				tokenForHtml);
-		out.print(outBlock);
-	}
-
 	private void createAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrl(AuthToken authToken,
-			String url, PrintWriter out, String firstName, String lastName) {
+			String url, PrintWriter out) {
 
-		String idInUserStorageEscaped = Encode.forJavaScript(authToken.idInUserStorage());
-		String tokenEscaped = Encode.forJavaScript(authToken.token());
-		String loginIdEscaped = Encode.forJavaScript(authToken.loginId());
-		String loginUrlEscaped = Encode.forJavaScript(url + authToken.tokenId());
-		String firstNameEscaped = Encode.forJavaScript(firstName);
-		String lastNameEscaped = Encode.forJavaScript(lastName);
 		String mainSystemDomainEscaped = Encode
 				.forJavaScript(IdpLoginInstanceProvider.getInitInfo().get("mainSystemDomain"));
 		String tokenForHtml = Encode.forHtml(authToken.token());
-		String permissionUnits = calculatePermissionUnits(authToken);
-		// AuthTokenToJsonConverter converter = new AuthTokenToJsonConverterImp();
 		AuthTokenToJsonConverter converter = AuthTokenToJsonConverterProvider.getConverter();
 		String jsonAuthToken = converter.convertAuthTokenToJson(authToken, url);
 		String jsonAuthTokenEscaped = Encode.forJavaScript(jsonAuthToken);
@@ -174,44 +99,6 @@ public class IdpLoginServlet extends HttpServlet {
 				</html>
 				""".formatted(jsonAuthTokenEscaped, mainSystemDomainEscaped, tokenForHtml);
 		out.print(outBlock);
-	}
-
-	private String calculatePermissionUnits(AuthToken authToken) {
-		if (authToken.permissionUnits().isEmpty()) {
-			return "";
-		}
-		return createPermissionUnitLinksFromAuthToken(authToken);
-	}
-
-	private String createPermissionUnitLinksFromAuthToken(AuthToken authToken) {
-		StringBuilder permissionUnits = new StringBuilder();
-		int repeatId = 0;
-		for (String permissionUnit : authToken.permissionUnits()) {
-			repeatId++;
-			permissionUnits.append(permissionUnitLink2(repeatId, permissionUnit));
-		}
-		return permissionUnits.toString();
-	}
-
-	private String permissionUnitLink2(int repeatId, String permissionUnit) {
-		String link = """
-				,
-				{
-					"repeatId" : "%d",
-					"children" : [
-						{"name" : "linkedRecordType", "value" : "permissionUnit"},
-						{"name" : "linkedRecordId", "value" : "%s"}
-					],
-					"name" : "permissionUnit"
-				}""".formatted(repeatId, permissionUnit);
-		return indentTextBlock(link);
-	}
-
-	private String indentTextBlock(String textBlock) {
-		int numberOfTabsToInsert = 8;
-		String tabs = "\t".repeat(numberOfTabsToInsert);
-		String result = textBlock.replaceAll("(?m)^", tabs);
-		return result.replaceFirst(tabs, "");
 	}
 
 	private AuthToken getNewAuthTokenFromGatekeeper(UserInfo userInfo) {
