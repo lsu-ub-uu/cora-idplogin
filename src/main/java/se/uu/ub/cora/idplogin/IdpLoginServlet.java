@@ -30,10 +30,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import se.uu.ub.cora.gatekeepertokenprovider.AuthToken;
 import se.uu.ub.cora.gatekeepertokenprovider.GatekeeperTokenProvider;
 import se.uu.ub.cora.gatekeepertokenprovider.UserInfo;
+import se.uu.ub.cora.gatekeepertokenprovider.json.AuthTokenToJsonConverter;
+import se.uu.ub.cora.gatekeepertokenprovider.json.AuthTokenToJsonConverterProvider;
 import se.uu.ub.cora.idplogin.initialize.IdpLoginInstanceProvider;
 import se.uu.ub.cora.idplogin.json.IdpLoginOnlySharingKnownInformationException;
-import se.uu.ub.cora.login.json.AuthTokenToJsonConverter;
-import se.uu.ub.cora.login.json.AuthTokenToJsonConverterProvider;
 
 public class IdpLoginServlet extends HttpServlet {
 
@@ -88,6 +88,12 @@ public class IdpLoginServlet extends HttpServlet {
 		response.setHeader("Content-Type", APPLICATION_VND_CORA_AUTHENTICATION_JSON);
 	}
 
+	private String convertTokenToJson(AuthToken authToken) {
+		AuthTokenToJsonConverter converter = AuthTokenToJsonConverterProvider.getConverter();
+		String url = IdpLoginInstanceProvider.getInitInfo().get("tokenLogoutURL");
+		return converter.convertAuthTokenToJson(authToken, url);
+	}
+
 	private void createAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrl(AuthToken authToken,
 			PrintWriter out) {
 
@@ -119,12 +125,6 @@ public class IdpLoginServlet extends HttpServlet {
 				</html>
 				""".formatted(jsonAuthTokenEscaped, mainSystemDomainEscaped, tokenForHtml);
 		out.print(outBlock);
-	}
-
-	private String convertTokenToJson(AuthToken authToken) {
-		AuthTokenToJsonConverter converter = AuthTokenToJsonConverterProvider.getConverter();
-		String url = IdpLoginInstanceProvider.getInitInfo().get("tokenLogoutURL");
-		return converter.convertAuthTokenToJson(authToken, url);
 	}
 
 }

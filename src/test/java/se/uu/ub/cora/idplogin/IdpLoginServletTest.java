@@ -38,9 +38,9 @@ import org.testng.annotations.Test;
 import jakarta.servlet.http.HttpServlet;
 import se.uu.ub.cora.gatekeepertokenprovider.AuthToken;
 import se.uu.ub.cora.gatekeepertokenprovider.UserInfo;
+import se.uu.ub.cora.gatekeepertokenprovider.json.AuthTokenToJsonConverterProvider;
 import se.uu.ub.cora.idplogin.initialize.IdpLoginInstanceProvider;
 import se.uu.ub.cora.idplogin.json.IdpLoginOnlySharingKnownInformationException;
-import se.uu.ub.cora.login.json.AuthTokenToJsonConverterProvider;
 
 public class IdpLoginServletTest {
 	private static final String MAIN_SYSTEM_DOMAIN = "http://localhost:8080";
