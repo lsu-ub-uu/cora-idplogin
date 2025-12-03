@@ -4,7 +4,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.Cookie;
@@ -17,6 +19,8 @@ public class ResponseSpy implements HttpServletResponse {
 	private PrintWriter printWriter = new PrintWriterSpy(stream);
 
 	public boolean throwIOExceptionOnGetWriter = false;
+
+	public Map<String, String> headers = new HashMap<>();
 
 	@Override
 	public void flushBuffer() throws IOException {
@@ -214,7 +218,7 @@ public class ResponseSpy implements HttpServletResponse {
 
 	@Override
 	public void setHeader(String arg0, String arg1) {
-		// TODO Auto-generated method stub
+		headers.put(arg0, arg1);
 
 	}
 

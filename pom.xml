@@ -29,7 +29,12 @@
 		<login.version>5.10-SNAPSHOT</login.version>
 		<password.version>1.9.0</password.version>
 		<gatekeeper.version>5.2.0</gatekeeper.version>
+		<storage.version>9.8.0</storage.version>
+		<userstorage.version>1.17.0</userstorage.version>
+		<basicdata.version>6.3.0</basicdata.version>
 		<initialize.version>1.7.0</initialize.version>
+		<sqldatabase.version>7.3.0</sqldatabase.version>
+		<sqlstorage.version>2.15.0</sqlstorage.version>
 		<jersey.version>4.0.0</jersey.version>
 		<servlet-api.version>5.0.0</servlet-api.version>
 		<encoder.version>1.4.0</encoder.version>
@@ -68,19 +73,49 @@
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>password</artifactId>
 			<version>${password.version}</version>
-			<scope>provided</scope>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>gatekeeper</artifactId>
 			<version>${gatekeeper.version}</version>
-			<scope>provided</scope>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>storage</artifactId>
+			<version>${storage.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>sqldatabase</artifactId>
+			<version>${sqldatabase.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>sqlstorage</artifactId>
+			<version>${sqlstorage.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>userstorage</artifactId>
+			<version>${userstorage.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>se.uu.ub.cora</groupId>
+			<artifactId>basicdata</artifactId>
+			<version>${basicdata.version}</version>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>
 			<artifactId>initialize</artifactId>
 			<version>${initialize.version}</version>
-			<scope>provided</scope>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>se.uu.ub.cora</groupId>

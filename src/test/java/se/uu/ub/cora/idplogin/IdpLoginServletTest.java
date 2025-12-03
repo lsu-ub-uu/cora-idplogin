@@ -45,6 +45,7 @@ import se.uu.ub.cora.login.json.AuthTokenToJsonConverterProvider;
 public class IdpLoginServletTest {
 	private static final String MAIN_SYSTEM_DOMAIN = "http://localhost:8080";
 	private static final String TOKEN_LOGOUT_URL = "http://localhost:8080/login/rest/authToken/";
+	private static final String ACCEPT = "application/vnd.cora.authentication+json";
 	private GatekeeperTokenProviderSpy gatekeeperTokenProvider;
 	private IdpLoginServlet loginServlet;
 	private RequestSpy requestSpy;
@@ -52,6 +53,7 @@ public class IdpLoginServletTest {
 	private Map<String, String> initInfo = new HashMap<>();
 	private AuthTokenToJsonConverterSpy tokenConverterSpy;
 	private AuthToken authToken;
+	private Set<String> permissionUnits;
 
 	@BeforeMethod
 	public void setup() {
@@ -72,7 +74,7 @@ public class IdpLoginServletTest {
 
 	private void setupGatekeeperTokenProviderSpy() {
 		gatekeeperTokenProvider = new GatekeeperTokenProviderSpy();
-		Set<String> permissionUnits = new LinkedHashSet<>();
+		permissionUnits = new LinkedHashSet<>();
 		permissionUnits.add("001");
 		permissionUnits.add("002");
 		authToken = new AuthToken("someAuth'Token", "someTokenId", 100L, 200L,
@@ -93,7 +95,7 @@ public class IdpLoginServletTest {
 	}
 
 	@Test
-	public void testInit() {
+	public void testIsServlet() {
 		assertTrue(loginServlet instanceof HttpServlet);
 	}
 
@@ -107,6 +109,23 @@ public class IdpLoginServletTest {
 		assertEquals(userInfo.loginId, "test@testing.org");
 	}
 
+	@Test
+	public void testDoGetEppnSentOnToGateKeeperForAccept() throws Exception {
+		requestSpy.headers.put("accept", ACCEPT);
+
+		loginServlet.doGet(requestSpy, responseSpy);
+
+		UserInfo userInfo = (UserInfo) gatekeeperTokenProvider.MCR
+				.getParameterForMethodAndCallNumberAndParameter("getAuthTokenForUserInfo", 0,
+						"userInfo");
+		assertEquals(userInfo.loginId, "test@testing.org");
+		String convertedToken = (String) tokenConverterSpy.MCR.assertCalledParametersReturn(
+				"convertAuthTokenToJson", authToken, TOKEN_LOGOUT_URL);
+
+		assertEquals(new String(responseSpy.stream.toByteArray()), convertedToken);
+		assertEquals(responseSpy.headers.get("Content-Type"), ACCEPT);
+	}
+
 	@DataProvider(name = "protocolType")
 	public Iterator<String> testCasesForProtcols() {
 		return Arrays.asList("https", "http", "").iterator();
@@ -115,29 +134,38 @@ public class IdpLoginServletTest {
 	@Test(dataProvider = "protocolType")
 	public void testGetCreatesCorrectHtmlAnswerOverParameterizedProtocolTypeHeader(String protocol)
 			throws Exception {
-
+		requestSpy.headers.put("accept", "notOurAccept");
 		requestSpy.headers.put("X-Forwarded-Proto", protocol);
 		loginServlet.doGet(requestSpy, responseSpy);
 
-		String expectedHtml = createExpectedHtmlWithAuthenticationFromSpy();
-		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
+		assertCorrectHtmlWithAuthenticationInResponseFromSpy();
 
 		tokenConverterSpy.MCR.assertCalledParameters("convertAuthTokenToJson", authToken,
 				TOKEN_LOGOUT_URL);
 	}
 
 	@Test
-	public void testGetCreatesCorrectHtmlAnswerOverHttpForMissingHeader() throws Exception {
+	public void testGetCreatesCorrectHtmlAnswerOverHttpForMissingHeaderWithPermissionUnits()
+			throws Exception {
 		loginServlet.doGet(requestSpy, responseSpy);
 
-		String expectedHtml = createExpectedHtmlWithAuthenticationFromSpy();
-		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
+		assertCorrectHtmlWithAuthenticationInResponseFromSpy();
 	}
 
-	private String createExpectedHtmlWithAuthenticationFromSpy() {
+	@Test(expectedExceptions = IdpLoginOnlySharingKnownInformationException.class, expectedExceptionsMessageRegExp = ""
+			+ "test@testing.org")
+	public void testGetWhenError() throws Exception {
+		responseSpy.throwIOExceptionOnGetWriter = true;
+		loginServlet.doGet(requestSpy, responseSpy);
+
+		assertCorrectHtmlWithAuthenticationInResponseFromSpy();
+
+	}
+
+	private void assertCorrectHtmlWithAuthenticationInResponseFromSpy() {
 		String mainSystemDomainEscaped = "http:\\/\\/localhost:8080";
 		String tokenForHtml = "someAuth&#39;Token";
-		return """
+		String expectedHtml = """
 				<!DOCTYPE html>
 				<html>
 					<head>
@@ -160,32 +188,6 @@ public class IdpLoginServletTest {
 				</html>
 				"""
 				.formatted(mainSystemDomainEscaped, tokenForHtml);
-	}
-
-	@Test
-	public void testGetCreatesCorrectHtmlAnswerOverHttpForMissingHeaderWithPermissionUnits()
-			throws Exception {
-		Set<String> permissionUnits = new LinkedHashSet<>();
-		permissionUnits.add("001");
-		permissionUnits.add("002");
-
-		gatekeeperTokenProvider.MRV.setDefaultReturnValuesSupplier("getAuthTokenForUserInfo",
-				() -> new AuthToken("someAuth'Token", "someTokenId", 100L, 200L,
-						"someIdInUser'Storage", "loginId", Optional.empty(), Optional.empty(),
-						permissionUnits));
-		loginServlet.doGet(requestSpy, responseSpy);
-
-		String expectedHtml = createExpectedHtmlWithAuthenticationFromSpy();
-		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
-	}
-
-	@Test(expectedExceptions = IdpLoginOnlySharingKnownInformationException.class, expectedExceptionsMessageRegExp = ""
-			+ "test@testing.org")
-	public void testGetWhenError() throws Exception {
-		responseSpy.throwIOExceptionOnGetWriter = true;
-		loginServlet.doGet(requestSpy, responseSpy);
-
-		String expectedHtml = createExpectedHtmlWithAuthenticationFromSpy();
 		assertEquals(new String(responseSpy.stream.toByteArray()), expectedHtml);
 	}
 }

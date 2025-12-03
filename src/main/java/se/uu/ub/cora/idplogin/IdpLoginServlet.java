@@ -37,6 +37,8 @@ import se.uu.ub.cora.login.json.AuthTokenToJsonConverterProvider;
 
 public class IdpLoginServlet extends HttpServlet {
 
+	private static final String APPLICATION_VND_CORA_AUTHENTICATION_JSON = ""
+			+ "application/vnd.cora.authentication+json";
 	private static final long serialVersionUID = 1L;
 
 	@Override
@@ -49,32 +51,50 @@ public class IdpLoginServlet extends HttpServlet {
 		// String firstName = request.getHeader("givenName");
 		UserInfo userInfo = UserInfo.withLoginId(userIdFromIdp);
 		AuthToken authTokenFromGatekeeper = getNewAuthTokenFromGatekeeper(userInfo);
+		tryToCreateAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrlAndUserId(request, response,
+				authTokenFromGatekeeper, userIdFromIdp);
+	}
 
-		String url = IdpLoginInstanceProvider.getInitInfo().get("tokenLogoutURL");
+	private AuthToken getNewAuthTokenFromGatekeeper(UserInfo userInfo) {
+		GatekeeperTokenProvider gatekeeperTokenProvider = IdpLoginInstanceProvider
+				.getGatekeeperTokenProvider();
 
-		tryToCreateAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrlAndUserId(response,
-				authTokenFromGatekeeper, url, userIdFromIdp);
+		return gatekeeperTokenProvider.getAuthTokenForUserInfo(userInfo);
 	}
 
 	private void tryToCreateAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrlAndUserId(
-			HttpServletResponse response, AuthToken authTokenFromGatekeeper, String url,
-			String userIdFromIdp) {
+			HttpServletRequest request, HttpServletResponse response,
+			AuthToken authTokenFromGatekeeper, String userIdFromIdp) {
 		try (PrintWriter out = response.getWriter();) {
-			createAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrl(authTokenFromGatekeeper, url,
-					out);
+			createAnswer(request, response, authTokenFromGatekeeper, out);
 		} catch (IOException _) {
 			throw IdpLoginOnlySharingKnownInformationException.forUserId(userIdFromIdp);
 		}
 	}
 
+	private void createAnswer(HttpServletRequest request, HttpServletResponse response,
+			AuthToken authTokenFromGatekeeper, PrintWriter out) {
+		String acceptHeader = request.getHeader("accept");
+		if (null != acceptHeader && acceptHeader.equals(APPLICATION_VND_CORA_AUTHENTICATION_JSON)) {
+			createTokenAnswer(authTokenFromGatekeeper, response, out);
+		} else {
+			createAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrl(authTokenFromGatekeeper, out);
+		}
+	}
+
+	private void createTokenAnswer(AuthToken authTokenFromGatekeeper, HttpServletResponse response,
+			PrintWriter out) {
+		out.print(convertTokenToJson(authTokenFromGatekeeper));
+		response.setHeader("Content-Type", APPLICATION_VND_CORA_AUTHENTICATION_JSON);
+	}
+
 	private void createAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrl(AuthToken authToken,
-			String url, PrintWriter out) {
+			PrintWriter out) {
 
 		String mainSystemDomainEscaped = Encode
 				.forJavaScript(IdpLoginInstanceProvider.getInitInfo().get("mainSystemDomain"));
 		String tokenForHtml = Encode.forHtml(authToken.token());
-		AuthTokenToJsonConverter converter = AuthTokenToJsonConverterProvider.getConverter();
-		String jsonAuthToken = converter.convertAuthTokenToJson(authToken, url);
+		String jsonAuthToken = convertTokenToJson(authToken);
 		String jsonAuthTokenEscaped = Encode.forJavaScript(jsonAuthToken);
 		String outBlock = """
 				<!DOCTYPE html>
@@ -101,11 +121,10 @@ public class IdpLoginServlet extends HttpServlet {
 		out.print(outBlock);
 	}
 
-	private AuthToken getNewAuthTokenFromGatekeeper(UserInfo userInfo) {
-		GatekeeperTokenProvider gatekeeperTokenProvider = IdpLoginInstanceProvider
-				.getGatekeeperTokenProvider();
-
-		return gatekeeperTokenProvider.getAuthTokenForUserInfo(userInfo);
+	private String convertTokenToJson(AuthToken authToken) {
+		AuthTokenToJsonConverter converter = AuthTokenToJsonConverterProvider.getConverter();
+		String url = IdpLoginInstanceProvider.getInitInfo().get("tokenLogoutURL");
+		return converter.convertAuthTokenToJson(authToken, url);
 	}
 
 }
