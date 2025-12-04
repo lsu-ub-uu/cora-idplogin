@@ -11,6 +11,8 @@ import java.util.Map;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import se.uu.ub.cora.testutils.mcr.MethodCallRecorder;
+import se.uu.ub.cora.testutils.mrv.MethodReturnValues;
 
 public class ResponseSpy implements HttpServletResponse {
 
@@ -21,6 +23,14 @@ public class ResponseSpy implements HttpServletResponse {
 	public boolean throwIOExceptionOnGetWriter = false;
 
 	public Map<String, String> headers = new HashMap<>();
+
+	public MethodCallRecorder MCR = new MethodCallRecorder();
+	public MethodReturnValues MRV = new MethodReturnValues();
+
+	public ResponseSpy() {
+		MCR.useMRV(MRV);
+		MRV.setDefaultReturnValuesSupplier("hasRepeatId", () -> false);
+	}
 
 	@Override
 	public void flushBuffer() throws IOException {
@@ -92,8 +102,7 @@ public class ResponseSpy implements HttpServletResponse {
 
 	@Override
 	public void setCharacterEncoding(String arg0) {
-		// TODO Auto-generated method stub
-
+		MCR.addCall("arg0", arg0);
 	}
 
 	@Override
@@ -104,8 +113,7 @@ public class ResponseSpy implements HttpServletResponse {
 
 	@Override
 	public void setContentType(String arg0) {
-		// TODO Auto-generated method stub
-
+		MCR.addCall("arg0", arg0);
 	}
 
 	@Override

@@ -122,8 +122,9 @@ public class IdpLoginServletTest {
 		String convertedToken = (String) tokenConverterSpy.MCR.assertCalledParametersReturn(
 				"convertAuthTokenToJson", authToken, TOKEN_LOGOUT_URL);
 
+		responseSpy.MCR.assertParameters("setCharacterEncoding", 0, "UTF-8");
 		assertEquals(new String(responseSpy.stream.toByteArray()), convertedToken);
-		assertEquals(responseSpy.headers.get("Content-Type"), ACCEPT);
+		responseSpy.MCR.assertParameters("setContentType", 0, ACCEPT);
 	}
 
 	@DataProvider(name = "protocolType")

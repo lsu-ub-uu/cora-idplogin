@@ -65,6 +65,7 @@ public class IdpLoginServlet extends HttpServlet {
 	private void tryToCreateAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrlAndUserId(
 			HttpServletRequest request, HttpServletResponse response,
 			AuthToken authTokenFromGatekeeper, String userIdFromIdp) {
+		response.setCharacterEncoding("UTF-8");
 		try (PrintWriter out = response.getWriter();) {
 			createAnswer(request, response, authTokenFromGatekeeper, out);
 		} catch (IOException _) {
@@ -84,8 +85,8 @@ public class IdpLoginServlet extends HttpServlet {
 
 	private void createTokenAnswer(AuthToken authTokenFromGatekeeper, HttpServletResponse response,
 			PrintWriter out) {
+		response.setContentType(APPLICATION_VND_CORA_AUTHENTICATION_JSON);
 		out.print(convertTokenToJson(authTokenFromGatekeeper));
-		response.setHeader("Content-Type", APPLICATION_VND_CORA_AUTHENTICATION_JSON);
 	}
 
 	private String convertTokenToJson(AuthToken authToken) {
