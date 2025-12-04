@@ -238,8 +238,7 @@ public class ResponseSpy implements HttpServletResponse {
 
 	@Override
 	public void setStatus(int arg0) {
-		// TODO Auto-generated method stub
-
+		MCR.addCall("arg0", arg0);
 	}
 
 	@Override

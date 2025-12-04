@@ -36,6 +36,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletResponse;
 import se.uu.ub.cora.gatekeepertokenprovider.AuthToken;
 import se.uu.ub.cora.gatekeepertokenprovider.UserInfo;
 import se.uu.ub.cora.gatekeepertokenprovider.json.AuthTokenToJsonConverterProvider;
@@ -125,6 +126,7 @@ public class IdpLoginServletTest {
 		responseSpy.MCR.assertParameters("setCharacterEncoding", 0, "UTF-8");
 		assertEquals(new String(responseSpy.stream.toByteArray()), convertedToken);
 		responseSpy.MCR.assertParameters("setContentType", 0, ACCEPT);
+		responseSpy.MCR.assertParameters("setStatus", 0, HttpServletResponse.SC_CREATED);
 	}
 
 	@DataProvider(name = "protocolType")

@@ -86,6 +86,7 @@ public class IdpLoginServlet extends HttpServlet {
 	private void createTokenAnswer(AuthToken authTokenFromGatekeeper, HttpServletResponse response,
 			PrintWriter out) {
 		response.setContentType(APPLICATION_VND_CORA_AUTHENTICATION_JSON);
+		response.setStatus(HttpServletResponse.SC_CREATED);
 		out.print(convertTokenToJson(authTokenFromGatekeeper));
 	}
 
