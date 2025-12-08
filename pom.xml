@@ -25,7 +25,7 @@
 
 	<properties>
 		<logger.version>2.10.0</logger.version>
-		<gatekeepertokenprovider.version>2.19.0</gatekeepertokenprovider.version>
+		<gatekeepertokenprovider.version>2.20.0</gatekeepertokenprovider.version>
 		<jersey.version>4.0.0</jersey.version>
 		<servlet-api.version>5.0.0</servlet-api.version>
 		<encoder.version>1.4.0</encoder.version>
