@@ -30,52 +30,80 @@ import jakarta.servlet.http.HttpServletResponse;
 import se.uu.ub.cora.gatekeepertokenprovider.AuthToken;
 import se.uu.ub.cora.gatekeepertokenprovider.GatekeeperTokenProvider;
 import se.uu.ub.cora.gatekeepertokenprovider.UserInfo;
+import se.uu.ub.cora.gatekeepertokenprovider.json.AuthTokenToJsonConverter;
+import se.uu.ub.cora.gatekeepertokenprovider.json.AuthTokenToJsonConverterProvider;
 import se.uu.ub.cora.idplogin.initialize.IdpLoginInstanceProvider;
 import se.uu.ub.cora.idplogin.json.IdpLoginOnlySharingKnownInformationException;
 
 public class IdpLoginServlet extends HttpServlet {
 
+	private static final String APPLICATION_VND_CORA_AUTHENTICATION_JSON = ""
+			+ "application/vnd.cora.authentication+json";
 	private static final long serialVersionUID = 1L;
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		String userIdFromIdp = request.getHeader("eppn");
-		String lastName = request.getHeader("sn");
-		String firstName = request.getHeader("givenName");
+		// the following two lines are left for now if we need the info when creating logins for
+		// users that are not stored in the system prior to logging in
+		// String lastName = request.getHeader("sn");
+		// String firstName = request.getHeader("givenName");
 		UserInfo userInfo = UserInfo.withLoginId(userIdFromIdp);
 		AuthToken authTokenFromGatekeeper = getNewAuthTokenFromGatekeeper(userInfo);
+		tryToCreateAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrlAndUserId(request, response,
+				authTokenFromGatekeeper, userIdFromIdp);
+	}
 
-		String url = IdpLoginInstanceProvider.getInitInfo().get("tokenLogoutURL");
+	private AuthToken getNewAuthTokenFromGatekeeper(UserInfo userInfo) {
+		GatekeeperTokenProvider gatekeeperTokenProvider = IdpLoginInstanceProvider
+				.getGatekeeperTokenProvider();
 
-		tryToCreateAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrlAndUserId(response,
-				authTokenFromGatekeeper, url, userIdFromIdp, firstName, lastName);
+		return gatekeeperTokenProvider.getAuthTokenForUserInfo(userInfo);
 	}
 
 	private void tryToCreateAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrlAndUserId(
-			HttpServletResponse response, AuthToken authTokenFromGatekeeper, String url,
-			String userIdFromIdp, String firstName, String lastName) {
+			HttpServletRequest request, HttpServletResponse response,
+			AuthToken authTokenFromGatekeeper, String userIdFromIdp) {
+		response.setCharacterEncoding("UTF-8");
 		try (PrintWriter out = response.getWriter();) {
-			createAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrl(authTokenFromGatekeeper, url,
-					out, firstName, lastName);
-		} catch (IOException e) {
+			createAnswer(request, response, authTokenFromGatekeeper, out);
+		} catch (IOException _) {
 			throw IdpLoginOnlySharingKnownInformationException.forUserId(userIdFromIdp);
 		}
 	}
 
-	private void createAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrl(AuthToken authToken,
-			String url, PrintWriter out, String firstName, String lastName) {
+	private void createAnswer(HttpServletRequest request, HttpServletResponse response,
+			AuthToken authTokenFromGatekeeper, PrintWriter out) {
+		String acceptHeader = request.getHeader("accept");
+		if (null != acceptHeader && acceptHeader.equals(APPLICATION_VND_CORA_AUTHENTICATION_JSON)) {
+			createTokenAnswer(authTokenFromGatekeeper, response, out);
+		} else {
+			createAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrl(authTokenFromGatekeeper, out);
+		}
+	}
 
-		String idInUserStorageEscaped = Encode.forJavaScript(authToken.idInUserStorage());
-		String tokenEscaped = Encode.forJavaScript(authToken.token());
-		String loginIdEscaped = Encode.forJavaScript(authToken.loginId());
-		String loginUrlEscaped = Encode.forJavaScript(url + authToken.tokenId());
-		String firstNameEscaped = Encode.forJavaScript(firstName);
-		String lastNameEscaped = Encode.forJavaScript(lastName);
+	private void createTokenAnswer(AuthToken authTokenFromGatekeeper, HttpServletResponse response,
+			PrintWriter out) {
+		response.setContentType(APPLICATION_VND_CORA_AUTHENTICATION_JSON);
+		response.setStatus(HttpServletResponse.SC_CREATED);
+		out.print(convertTokenToJson(authTokenFromGatekeeper));
+	}
+
+	private String convertTokenToJson(AuthToken authToken) {
+		AuthTokenToJsonConverter converter = AuthTokenToJsonConverterProvider.getConverter();
+		String url = IdpLoginInstanceProvider.getInitInfo().get("tokenLogoutURL");
+		return converter.convertAuthTokenToJson(authToken, url);
+	}
+
+	private void createAnswerHtmlToResponseUsingResponseAndAuthTokenAndUrl(AuthToken authToken,
+			PrintWriter out) {
+
 		String mainSystemDomainEscaped = Encode
 				.forJavaScript(IdpLoginInstanceProvider.getInitInfo().get("mainSystemDomain"));
 		String tokenForHtml = Encode.forHtml(authToken.token());
-		String permissionUnits = calculatePermissionUnits(authToken);
+		String jsonAuthToken = convertTokenToJson(authToken);
+		String jsonAuthTokenEscaped = Encode.forJavaScript(jsonAuthToken);
 		String outBlock = """
 				<!DOCTYPE html>
 				<html>
@@ -84,35 +112,7 @@ public class IdpLoginServlet extends HttpServlet {
 						<script type="text/javascript">
 							window.onload = start;
 							function start() {
-								var authentication = {
-									"authentication" : {
-										"data" : {
-											"children" : [
-												{"name" : "token", "value" : "%s"},
-												{"name" : "validUntil", "value" : "%s"},
-												{"name" : "renewUntil", "value" : "%s"},
-												{"name" : "userId", "value" : "%s"},
-												{"name" : "loginId", "value" : "%s"},
-												{"name" : "firstName", "value" : "%s"},
-												{"name" : "lastName", "value" : "%s"}%s
-											],
-											"name" : "authToken"
-										},
-										"actionLinks" : {
-											"renew" : {
-												"requestMethod" : "POST",
-												"rel" : "renew",
-												"url" : "%s",
-												"accept": "application/vnd.cora.authentication+json"
-											},
-											"delete" : {
-												"requestMethod" : "DELETE",
-												"rel" : "delete",
-												"url" : "%s"
-											}
-										}
-									}
-								};
+								var authentication = %s;
 								if(null!=window.opener){
 									window.opener.postMessage(authentication, "%s");
 									window.opener.focus();
@@ -125,56 +125,8 @@ public class IdpLoginServlet extends HttpServlet {
 						token: %s
 					</body>
 				</html>
-				""".formatted(tokenEscaped, authToken.validUntil(), authToken.renewUntil(),
-				idInUserStorageEscaped, loginIdEscaped, firstNameEscaped, lastNameEscaped,
-				permissionUnits, loginUrlEscaped, loginUrlEscaped, mainSystemDomainEscaped,
-				tokenForHtml);
+				""".formatted(jsonAuthTokenEscaped, mainSystemDomainEscaped, tokenForHtml);
 		out.print(outBlock);
-	}
-
-	private String calculatePermissionUnits(AuthToken authToken) {
-		if (authToken.permissionUnits().isEmpty()) {
-			return "";
-		}
-		return createPermissionUnitLinksFromAuthToken(authToken);
-	}
-
-	private String createPermissionUnitLinksFromAuthToken(AuthToken authToken) {
-		StringBuilder permissionUnits = new StringBuilder();
-		int repeatId = 0;
-		for (String permissionUnit : authToken.permissionUnits()) {
-			repeatId++;
-			permissionUnits.append(permissionUnitLink2(repeatId, permissionUnit));
-		}
-		return permissionUnits.toString();
-	}
-
-	private String permissionUnitLink2(int repeatId, String permissionUnit) {
-		String link = """
-				,
-				{
-					"repeatId" : "%d",
-					"children" : [
-						{"name" : "linkedRecordType", "value" : "permissionUnit"},
-						{"name" : "linkedRecordId", "value" : "%s"}
-					],
-					"name" : "permissionUnit"
-				}""".formatted(repeatId, permissionUnit);
-		return indentTextBlock(link);
-	}
-
-	private String indentTextBlock(String textBlock) {
-		int numberOfTabsToInsert = 8;
-		String tabs = "\t".repeat(numberOfTabsToInsert);
-		String result = textBlock.replaceAll("(?m)^", tabs);
-		return result.replaceFirst(tabs, "");
-	}
-
-	private AuthToken getNewAuthTokenFromGatekeeper(UserInfo userInfo) {
-		GatekeeperTokenProvider gatekeeperTokenProvider = IdpLoginInstanceProvider
-				.getGatekeeperTokenProvider();
-
-		return gatekeeperTokenProvider.getAuthTokenForUserInfo(userInfo);
 	}
 
 }
