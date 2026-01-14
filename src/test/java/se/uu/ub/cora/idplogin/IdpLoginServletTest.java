@@ -176,7 +176,7 @@ public class IdpLoginServletTest {
 						<script type="text/javascript">
 							window.onload = start;
 							function start() {
-								var authentication = fake json \\x27authtoken\\x27 from AuthTokenToJsonConverterSpy;
+								var authentication = "fake json \\x27authtoken\\x27 from AuthTokenToJsonConverterSpy";
 								if(null!=window.opener){
 									window.opener.postMessage(authentication, "%s");
 									window.opener.focus();

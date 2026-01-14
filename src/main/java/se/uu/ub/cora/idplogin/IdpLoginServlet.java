@@ -112,7 +112,7 @@ public class IdpLoginServlet extends HttpServlet {
 						<script type="text/javascript">
 							window.onload = start;
 							function start() {
-								var authentication = %s;
+								var authentication = "%s";
 								if(null!=window.opener){
 									window.opener.postMessage(authentication, "%s");
 									window.opener.focus();
