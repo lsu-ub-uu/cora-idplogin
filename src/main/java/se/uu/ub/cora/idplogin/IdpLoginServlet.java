@@ -103,7 +103,7 @@ public class IdpLoginServlet extends HttpServlet {
 				.forJavaScript(IdpLoginInstanceProvider.getInitInfo().get("mainSystemDomain"));
 		String tokenForHtml = Encode.forHtml(authToken.token());
 		String jsonAuthToken = convertTokenToJson(authToken);
-		String jsonAuthTokenEscaped = Encode.forJavaScript(jsonAuthToken);
+		// String jsonAuthTokenEscaped = Encode.forJavaScript(jsonAuthToken);
 		String outBlock = """
 				<!DOCTYPE html>
 				<html>
@@ -112,7 +112,7 @@ public class IdpLoginServlet extends HttpServlet {
 						<script type="text/javascript">
 							window.onload = start;
 							function start() {
-								var authentication = "%s";
+								var authentication = %s;
 								if(null!=window.opener){
 									window.opener.postMessage(authentication, "%s");
 									window.opener.focus();
@@ -125,7 +125,7 @@ public class IdpLoginServlet extends HttpServlet {
 						token: %s
 					</body>
 				</html>
-				""".formatted(jsonAuthTokenEscaped, mainSystemDomainEscaped, tokenForHtml);
+				""".formatted(jsonAuthToken, mainSystemDomainEscaped, tokenForHtml);
 		out.print(outBlock);
 	}
 
